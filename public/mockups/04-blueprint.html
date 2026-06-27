@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>モック04 Blueprint／設計図風</title>
+<style>
+  :root{
+    --bp:#0d3b66; --bp2:#0a2f52; --ink:#dbeafe; --dim:#7fa8d0; --cyan:#67e8f9; --amber:#fcd34d;
+    --grid:rgba(150,190,230,.16); --line:rgba(150,190,230,.35);
+    font-family:'SFMono-Regular',ui-monospace,'Consolas','Hiragino Kaku Gothic ProN',monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;color:var(--ink);min-height:100vh;
+    background:
+      linear-gradient(var(--grid) 1px,transparent 1px) 0 0/22px 22px,
+      linear-gradient(90deg,var(--grid) 1px,transparent 1px) 0 0/22px 22px,
+      linear-gradient(160deg,var(--bp) 0%,var(--bp2) 100%);
+    background-attachment:fixed}
+  .wrap{max-width:980px;margin:0 auto;padding:24px 18px 130px}
+  .frame{border:1.5px solid var(--line);border-radius:3px;padding:18px 18px 6px;position:relative;
+    background:rgba(10,40,70,.35)}
+  .tb{position:absolute;right:0;bottom:0;border-left:1px solid var(--line);border-top:1px solid var(--line);
+    font-size:10px;color:var(--dim);padding:5px 9px;letter-spacing:.08em}
+  .ttl{display:flex;align-items:baseline;gap:12px;border-bottom:1px solid var(--line);padding-bottom:10px}
+  h1{font-size:15px;letter-spacing:.18em;margin:0;color:#fff;font-weight:600}
+  .rev{font-size:10px;color:var(--cyan);letter-spacing:.15em}
+  .note{font-size:11px;color:var(--dim);margin:.6em 0;line-height:1.6}
+  .scale{display:flex;justify-content:space-between;font-size:11px;color:var(--cyan);
+    letter-spacing:.1em;padding:10px 0 4px;border-bottom:1px dashed var(--line)}
+  .chart{position:relative}
+  .brk{position:absolute;top:0;border-left:1px dashed var(--amber);opacity:.7;z-index:1}
+  .brk::after{content:'⌐ 2035';position:absolute;top:2px;left:5px;font-size:10px;color:var(--amber)}
+  .lane{position:relative;height:66px;border-bottom:1px dotted var(--line)}
+  .lhead{position:absolute;left:2px;top:9px;z-index:3;font-size:12px}
+  .lhead .id{color:var(--cyan);font-weight:700}
+  .lhead small{color:var(--dim);margin-left:6px;font-size:10.5px}
+  .track{position:absolute;left:4px;right:8px;top:42px;height:0;border-top:1px solid var(--ink)}
+  .track::after{content:'';position:absolute;left:var(--bx,64%);right:0;top:0;border-top:1px dashed var(--dim)}
+  .node{position:absolute;transform:translate(-50%,-50%);top:0;background:none;border:0;cursor:pointer;padding:0;color:inherit}
+  .mk{display:block;width:13px;height:13px;border:1.5px solid var(--cyan);background:rgba(13,59,102,.6)}
+  .c1 .mk{background:var(--cyan)}
+  .c2 .mk{border-color:var(--amber);background:transparent;border-radius:50%}
+  .c3 .mk{border-color:var(--amber);border-style:dashed;transform:rotate(45deg);background:transparent}
+  .nlab{position:absolute;left:50%;transform:translateX(-50%);top:13px;white-space:nowrap;font-size:10px;color:var(--dim)}
+  .dim-tick{position:absolute;top:-7px;left:50%;transform:translateX(-50%);font-size:8px;color:var(--dim)}
+  .node:hover .mk{box-shadow:0 0 8px var(--cyan)}
+  .node:hover .nlab{color:#fff}
+  .legend{font-size:11px;color:var(--dim);display:flex;gap:16px;flex-wrap:wrap;margin-top:16px}
+  .lg{display:flex;align-items:center;gap:6px}
+  .di{width:11px;height:11px;border:1.5px solid var(--cyan)}
+  .cap{position:fixed;left:0;right:0;bottom:0;background:rgba(10,40,70,.95);border-top:1px solid var(--cyan);
+    padding:14px 18px;font-size:12.5px;line-height:1.6;backdrop-filter:blur(5px)}
+  .cap b{color:var(--cyan)}
+  .cc{font-size:10px;border:1px solid var(--cyan);color:var(--cyan);padding:1px 6px;margin:0 6px 0 2px}
+  .cc.c2,.cc.c3{border-color:var(--amber);color:var(--amber)}
+  .hint{color:var(--dim)}
+  @media(max-width:640px){.nlab{display:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="frame">
+    <div class="ttl"><h1>ROTORDYNAMICS ROADMAP</h1><span class="rev">DWG&nbsp;v0 · rev.A</span></div>
+    <div class="note">⌀ 注記: 社会動向 → 需要シフト → RD課題（UMP・危険速度・サブシンクロナス・ねじり）→ 要素技術。寸法線＝時間軸。</div>
+    <div class="scale"><span>now 2026</span><span>2030</span><span>2035</span><span>2040+</span></div>
+    <div class="chart" id="chart"></div>
+    <div class="legend">
+      <span class="lg"><span class="di" style="background:#67e8f9"></span>確立</span>
+      <span class="lg"><span class="di" style="border-radius:50%;border-color:#fcd34d"></span>推定</span>
+      <span class="lg"><span class="di" style="border-color:#fcd34d;border-style:dashed;transform:rotate(45deg)"></span>仮説</span>
+      <span class="lg">─ 〜2035 ／ ┄ 2035〜</span>
+    </div>
+    <div class="tb">SHT 1/1 · SCALE NTS · ROTORDYNAMICS HUB</div>
+  </div>
+</div>
+<div class="cap" id="cap"><span class="hint">□ ノードをタップすると詳細が出ます（Blueprint／設計図風モック）</span></div>
+<script src="./_data.js"></script>
+<script>
+  const NOW=2026,END=2040,BREAK=2035,CN={1:'確立',2:'推定',3:'仮説'};
+  const xp=y=>((y-NOW)/(END-NOW)*100);
+  const chart=document.getElementById('chart'),cap=document.getElementById('cap');
+  DATA.forEach((d,i)=>{
+    const lane=document.createElement('div');lane.className='lane';
+    lane.innerHTML=`<div class="lhead"><span class="id">${d.icon} ${d.id}</span> ${d.name}<small>${d.short}</small></div>`;
+    const track=document.createElement('div');track.className='track';track.style.setProperty('--bx',xp(BREAK)+'%');
+    d.nodes.forEach(n=>{
+      const b=document.createElement('button');b.className='node c'+n.c;b.style.left=xp(n.y)+'%';b.title=n.t;
+      b.innerHTML=`<span class="dim-tick">${n.y}</span><span class="mk"></span><span class="nlab">${n.s}</span>`;
+      b.onclick=()=>{cap.innerHTML=`<b>${d.icon} ${d.id} ${d.name}</b><span class="cc c${n.c}">${CN[n.c]}</span>${n.y>=BREAK?'2035〜 長期':'〜'+(n.y<2031?'2030':'2035')}<br>${n.t}`;};
+      track.appendChild(b);
+    });
+    lane.appendChild(track);
+    if(i===0){const brk=document.createElement('div');brk.className='brk';brk.style.left=xp(BREAK)+'%';brk.style.height=(DATA.length*66)+'px';chart.appendChild(brk);}
+    chart.appendChild(lane);
+  });
+</script>
+</body>
+</html>

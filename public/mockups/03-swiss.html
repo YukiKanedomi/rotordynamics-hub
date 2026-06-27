@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>モック03 Swiss／連続時間軸</title>
+<style>
+  :root{
+    --bg:#ffffff; --ink:#111111; --dim:#9a9a9a; --line:#e6e6e6; --accent:#ff3b30;
+    font-family:'Helvetica Neue','Hiragino Kaku Gothic ProN','Yu Gothic',Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);min-height:100vh}
+  .wrap{max-width:1000px;margin:0 auto;padding:34px 24px 130px}
+  .head{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:end;
+    border-bottom:3px solid var(--ink);padding-bottom:12px}
+  h1{font-size:clamp(22px,4vw,34px);margin:0;font-weight:800;letter-spacing:-.02em;line-height:1}
+  h1 small{display:block;font-size:12px;font-weight:500;color:var(--dim);letter-spacing:.04em;margin-top:8px}
+  .meta{font-size:11px;color:var(--dim);text-align:right;letter-spacing:.03em;line-height:1.6}
+  .scale{position:relative;height:24px;margin-top:18px;border-bottom:1px solid var(--ink)}
+  .tick{position:absolute;bottom:0;transform:translateX(-50%);font-size:11px;color:var(--ink);
+    font-weight:700;padding-bottom:5px}
+  .tick::after{content:'';position:absolute;left:50%;bottom:-1px;width:1px;height:7px;background:var(--ink)}
+  .tick.now{color:var(--accent)}
+  .grid{position:relative}
+  .vline{position:absolute;top:0;bottom:0;width:1px;background:var(--line);z-index:0}
+  .vline.brk{background:var(--accent);opacity:.5;border-left:1px dashed var(--accent);background:none}
+  .lane{position:relative;height:66px;border-bottom:1px solid var(--line);z-index:1}
+  .lhead{position:absolute;left:0;top:10px}
+  .lid{font-weight:800;font-size:13px}
+  .lname{font-size:13px;font-weight:700;margin-left:6px}
+  .lhead small{display:block;font-size:10.5px;color:var(--dim);margin-top:3px}
+  .track{position:absolute;left:0;right:4px;top:42px;height:2px;background:var(--ink)}
+  .track::after{content:'';position:absolute;left:var(--bx,64%);right:0;top:0;height:2px;
+    background:repeating-linear-gradient(90deg,var(--ink) 0 3px,transparent 3px 7px)}
+  .node{position:absolute;transform:translate(-50%,-50%);top:1px;background:none;border:0;cursor:pointer;padding:0}
+  .mk{display:block;width:13px;height:13px;border-radius:50%;background:var(--ink)}
+  .c2 .mk{background:#fff;border:2.5px solid var(--ink)}
+  .c3 .mk{background:#fff;border:2.5px solid var(--accent)}
+  .nlab{position:absolute;left:50%;transform:translateX(-50%);top:13px;white-space:nowrap;font-size:10px;color:var(--dim)}
+  .node:hover .mk{background:var(--accent);border-color:var(--accent)}
+  .node:hover .nlab{color:var(--ink)}
+  .legend{display:flex;gap:18px;flex-wrap:wrap;font-size:11px;color:var(--dim);margin-top:20px}
+  .lg{display:flex;align-items:center;gap:7px}
+  .di{width:12px;height:12px;border-radius:50%}
+  .cap{position:fixed;left:0;right:0;bottom:0;background:var(--ink);color:#fff;
+    padding:15px 22px;font-size:13px;line-height:1.6}
+  .cap b{color:#fff}
+  .cc{font-size:10px;font-weight:800;letter-spacing:.05em;border:1px solid #fff;padding:1px 6px;margin:0 6px 0 2px;border-radius:2px}
+  .cc.c3{border-color:var(--accent);color:var(--accent)}
+  .hint{color:#b9b9b9}
+  @media(max-width:640px){.nlab{display:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="head">
+    <h1>ROTORDYNAMICS ROADMAP<small>回転機械 ／ 社会動向ひも付け技術ロードマップ</small></h1>
+    <div class="meta">5 DRIVERS<br>2026 — 2040<br>v0 / mock</div>
+  </div>
+  <div class="scale" id="scale"></div>
+  <div class="grid" id="grid"></div>
+  <div class="legend">
+    <span class="lg"><span class="di" style="background:#111"></span>確立</span>
+    <span class="lg"><span class="di" style="background:#fff;border:2.5px solid #111"></span>推定</span>
+    <span class="lg"><span class="di" style="background:#fff;border:2.5px solid #ff3b30"></span>仮説</span>
+    <span class="lg">── 〜2035 ／ ┄┄ 2035〜</span>
+  </div>
+</div>
+<div class="cap" id="cap"><span class="hint">● マーカーをタップすると詳細が出ます（Swiss／連続時間軸モック）</span></div>
+<script src="./_data.js"></script>
+<script>
+  const NOW=2026,END=2040,BREAK=2035,CN={1:'確立',2:'推定',3:'仮説'};
+  const xp=y=>((y-NOW)/(END-NOW)*100);
+  const scale=document.getElementById('scale'),grid=document.getElementById('grid'),cap=document.getElementById('cap');
+  [['now 2026',2026,1],['2030',2030,0],['2035',2035,0],['2040',2040,0]].forEach(([t,y,now])=>{
+    const s=document.createElement('span');s.className='tick'+(now?' now':'');s.style.left=xp(y)+'%';s.textContent=t;scale.appendChild(s);
+  });
+  [2030,2035,2040].forEach(y=>{const v=document.createElement('div');v.className='vline'+(y===2035?' brk':'');v.style.left=xp(y)+'%';grid.appendChild(v);});
+  DATA.forEach(d=>{
+    const lane=document.createElement('div');lane.className='lane';
+    lane.innerHTML=`<div class="lhead"><span class="lid">${d.id}</span><span class="lname">${d.name}</span><small>${d.short}</small></div>`;
+    const track=document.createElement('div');track.className='track';track.style.setProperty('--bx',xp(BREAK)+'%');
+    d.nodes.forEach(n=>{
+      const b=document.createElement('button');b.className='node c'+n.c;b.style.left=xp(n.y)+'%';b.title=n.t;
+      b.innerHTML=`<span class="mk"></span><span class="nlab">${n.s}</span>`;
+      b.onclick=()=>{cap.innerHTML=`<b>${d.id} ${d.name}</b><span class="cc c${n.c}">${CN[n.c]}</span>${n.y>=BREAK?'2035〜 長期':'〜'+(n.y<2031?'2030':'2035')}<br>${n.t}`;};
+      track.appendChild(b);
+    });
+    lane.appendChild(track);grid.appendChild(lane);
+  });
+</script>
+</body>
+</html>

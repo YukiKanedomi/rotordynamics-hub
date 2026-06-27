@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>モック01 計器盤／オシロ風</title>
+<style>
+  :root{
+    --bg:#070b14; --grid:rgba(64,180,210,.10); --ink:#e6f1f5; --dim:#7c93a3;
+    --cyan:#22d3ee; --cyan2:#0891a8; --amber:#fbbf24; --line:rgba(120,160,180,.22);
+    font-family:'SFMono-Regular',ui-monospace,'Cascadia Mono','Consolas',monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:
+      radial-gradient(1200px 500px at 70% -10%, rgba(34,211,238,.10), transparent 60%),
+      var(--bg);
+    color:var(--ink);min-height:100vh}
+  .wrap{max-width:980px;margin:0 auto;padding:22px 16px 120px}
+  .top{display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--line);padding-bottom:14px}
+  .led{width:11px;height:11px;border-radius:50%;background:var(--cyan);box-shadow:0 0 12px 2px var(--cyan)}
+  h1{font-size:15px;letter-spacing:.22em;margin:0;font-weight:600}
+  .sub{margin-left:auto;font-size:11px;color:var(--dim);letter-spacing:.1em}
+  .scope{position:relative;margin-top:18px;border:1px solid var(--line);border-radius:14px;
+    background:
+      linear-gradient(transparent 95%, var(--grid) 95%) 0 0/100% 28px,
+      linear-gradient(90deg, transparent 95%, var(--grid) 95%) 0 0/56px 100%,
+      rgba(8,16,26,.6);
+    overflow:hidden;padding:8px 0 0}
+  .wave{position:absolute;inset:0;width:100%;height:100%;opacity:.5;pointer-events:none}
+  .axis{display:flex;justify-content:space-between;font-size:11px;color:var(--dim);
+    padding:6px 14px 8px;letter-spacing:.08em;border-bottom:1px dashed var(--line)}
+  .axis b{color:var(--cyan)}
+  .lanes{position:relative}
+  .brk{position:absolute;top:0;bottom:0;width:0;border-left:1px dashed rgba(251,191,36,.5);z-index:1}
+  .brk::after{content:'2035 →';position:absolute;top:4px;left:6px;font-size:10px;color:var(--amber);letter-spacing:.1em}
+  .lane{position:relative;height:62px;border-bottom:1px solid rgba(120,160,180,.10)}
+  .lane:last-child{border-bottom:0}
+  .lhead{position:absolute;left:12px;top:9px;font-size:12px;color:var(--ink);z-index:3}
+  .lhead .ic{margin-right:6px}
+  .lhead b{color:var(--cyan)}
+  .lhead small{color:var(--dim);margin-left:4px}
+  .track{position:absolute;left:14px;right:18px;top:38px;height:2px;
+    background:linear-gradient(90deg,var(--cyan2) 0 var(--bx,64%),transparent var(--bx,64%));}
+  .track::after{content:'';position:absolute;left:var(--bx,64%);right:0;top:0;height:0;
+    border-top:2px dotted rgba(120,160,180,.4)}
+  .node{position:absolute;transform:translate(-50%,-50%);top:1px;background:none;border:0;cursor:pointer;padding:0}
+  .dot{display:block;width:12px;height:12px;border-radius:50%;background:var(--cyan);
+    box-shadow:0 0 10px 1px var(--cyan);border:2px solid #06121a}
+  .c2 .dot{background:var(--amber);box-shadow:0 0 10px 1px var(--amber)}
+  .c3 .dot{background:transparent;border:2px solid var(--amber);box-shadow:0 0 8px rgba(251,191,36,.5)}
+  .nlab{position:absolute;left:50%;transform:translateX(-50%);top:14px;white-space:nowrap;
+    font-size:10px;color:var(--dim);letter-spacing:.02em}
+  .node:hover .dot{transform:scale(1.25)}
+  .node:hover .nlab{color:var(--ink)}
+  .legend{display:flex;gap:16px;flex-wrap:wrap;font-size:11px;color:var(--dim);margin-top:16px;letter-spacing:.05em}
+  .lg{display:flex;align-items:center;gap:6px}
+  .sw{width:11px;height:11px;border-radius:50%}
+  .cap{position:fixed;left:0;right:0;bottom:0;background:rgba(7,13,22,.94);
+    border-top:1px solid var(--cyan2);padding:14px 18px;font-size:13px;line-height:1.6;
+    backdrop-filter:blur(6px)}
+  .cap b{color:var(--cyan)}
+  .cc{font-size:11px;padding:1px 7px;border-radius:4px;color:#06121a;font-weight:700}
+  .cc.c1{background:var(--cyan)}.cc.c2{background:var(--amber)}.cc.c3{background:transparent;color:var(--amber);border:1px solid var(--amber)}
+  .hint{color:var(--dim);font-size:11px}
+  @media(max-width:640px){.nlab{display:none}.scope{overflow-x:hidden}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <span class="led"></span>
+    <h1>ROTORDYNAMICS&nbsp;HUB</h1>
+    <span class="sub">CAMPBELL / ROADMAP · v0</span>
+  </div>
+  <div class="scope">
+    <svg class="wave" viewBox="0 0 980 360" preserveAspectRatio="none">
+      <path d="M0,300 C120,120 240,120 360,260 C480,380 600,160 720,200 C840,240 920,140 980,180"
+        fill="none" stroke="#22d3ee" stroke-width="1.2" opacity="0.5"/>
+    </svg>
+    <div class="axis"><span><b>now</b> 2026</span><span>2030</span><span>2035</span><span>2040+</span></div>
+    <div class="lanes" id="lanes"></div>
+  </div>
+  <div class="legend">
+    <span class="lg"><span class="sw" style="background:#22d3ee;box-shadow:0 0 8px #22d3ee"></span>確立</span>
+    <span class="lg"><span class="sw" style="background:#fbbf24;box-shadow:0 0 8px #fbbf24"></span>推定</span>
+    <span class="lg"><span class="sw" style="border:2px solid #fbbf24"></span>仮説</span>
+    <span class="lg">— 実線=〜2035 ／ ⋯ 点線=2035〜</span>
+  </div>
+</div>
+<div class="cap" id="cap"><span class="hint">▲ ノードをタップすると詳細が出ます（オシロスコープ／計器盤風モック）</span></div>
+<script src="./_data.js"></script>
+<script>
+  const NOW=2026,END=2040,BREAK=2035,CN={1:'確立',2:'推定',3:'仮説'};
+  const xp=y=>((y-NOW)/(END-NOW)*100);
+  const lanes=document.getElementById('lanes'),cap=document.getElementById('cap');
+  DATA.forEach(d=>{
+    const lane=document.createElement('div');lane.className='lane';
+    lane.innerHTML=`<div class="lhead"><span class="ic">${d.icon}</span><b>${d.id}</b> ${d.name}<small>${d.short}</small></div>`;
+    const track=document.createElement('div');track.className='track';track.style.setProperty('--bx',xp(BREAK)+'%');
+    d.nodes.forEach(n=>{
+      const b=document.createElement('button');b.className='node c'+n.c;b.style.left=xp(n.y)+'%';b.title=n.t;
+      b.innerHTML=`<span class="dot"></span><span class="nlab">${n.s}</span>`;
+      b.onclick=()=>{cap.innerHTML=`<b>${d.icon} ${d.id} ${d.name}</b> · <span class="cc c${n.c}">${CN[n.c]}</span> · ${n.y>=BREAK?'2035〜 長期':'〜'+(n.y<2031?'2030':'2035')}<br>${n.t}`;};
+      track.appendChild(b);
+    });
+    lane.appendChild(track);
+    if(d===DATA[0]){const brk=document.createElement('div');brk.className='brk';brk.style.left=xp(BREAK)+'%';lanes.appendChild(brk);}
+    lanes.appendChild(lane);
+  });
+</script>
+</body>
+</html>

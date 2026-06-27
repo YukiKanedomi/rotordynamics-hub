@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>モック02 技術誌／教科書風</title>
+<style>
+  :root{
+    --paper:#f6f3ec; --ink:#1f2420; --dim:#8a8378; --rule:#d8d1c4;
+    --accent:#7a2424; --accent2:#b08a3e;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);
+    font-family:'Hiragino Mincho ProN','Yu Mincho',serif;min-height:100vh}
+  .wrap{max-width:900px;margin:0 auto;padding:40px 26px 130px}
+  .kicker{font-size:11px;letter-spacing:.42em;color:var(--accent);text-transform:uppercase;
+    font-family:Georgia,serif}
+  h1{font-size:clamp(26px,5vw,40px);margin:.18em 0 .1em;font-weight:600;letter-spacing:.01em;line-height:1.18}
+  .dek{font-family:'Hiragino Kaku Gothic ProN','Yu Gothic',sans-serif;color:var(--dim);
+    font-size:13px;line-height:1.7;max-width:620px;margin:.4em 0 0}
+  .rule{height:2px;background:var(--ink);margin:22px 0 6px}
+  .rule.thin{height:1px;background:var(--rule)}
+  .scale{display:flex;justify-content:space-between;font-family:Georgia,serif;font-size:12px;
+    color:var(--dim);letter-spacing:.1em;padding:8px 0 2px}
+  .scale b{color:var(--accent)}
+  .chart{position:relative;margin-top:4px}
+  .brk{position:absolute;top:0;bottom:0;border-left:1px solid var(--accent2);opacity:.6;z-index:1}
+  .brk::after{content:'2035';position:absolute;top:-2px;left:5px;font-family:Georgia,serif;
+    font-size:10px;color:var(--accent2);letter-spacing:.15em}
+  .lane{position:relative;height:74px;border-bottom:1px solid var(--rule)}
+  .lane:first-child{border-top:1px solid var(--rule)}
+  .lhead{position:absolute;left:0;top:12px;z-index:3}
+  .lnum{font-family:Georgia,serif;color:var(--accent);font-size:13px;margin-right:8px}
+  .lname{font-family:'Hiragino Kaku Gothic ProN',sans-serif;font-weight:600;font-size:14px}
+  .lhead small{display:block;font-family:'Hiragino Kaku Gothic ProN',sans-serif;color:var(--dim);
+    font-size:11px;margin-top:2px;margin-left:21px}
+  .track{position:absolute;left:0;right:6px;top:46px;height:1px;background:var(--ink)}
+  .track::after{content:'';position:absolute;left:var(--bx,64%);right:0;top:0;
+    border-top:1px dashed var(--dim)}
+  .node{position:absolute;transform:translate(-50%,-50%);top:0;background:none;border:0;cursor:pointer;padding:0}
+  .mk{display:block;width:11px;height:11px;background:var(--ink);transform:rotate(45deg);border:1px solid var(--ink)}
+  .c1 .mk{background:var(--ink)}
+  .c2 .mk{background:var(--paper)}
+  .c3 .mk{background:var(--paper);border-style:dashed;transform:rotate(45deg)}
+  .nlab{position:absolute;left:50%;transform:translateX(-50%);top:12px;white-space:nowrap;
+    font-family:'Hiragino Kaku Gothic ProN',sans-serif;font-size:10.5px;color:var(--dim)}
+  .node:hover .mk{background:var(--accent);border-color:var(--accent)}
+  .node:hover .nlab{color:var(--ink)}
+  .legend{font-family:'Hiragino Kaku Gothic ProN',sans-serif;font-size:11.5px;color:var(--dim);
+    display:flex;gap:18px;flex-wrap:wrap;margin-top:18px}
+  .lg{display:flex;align-items:center;gap:7px}
+  .di{width:10px;height:10px;transform:rotate(45deg)}
+  .cap{position:fixed;left:0;right:0;bottom:0;background:rgba(246,243,236,.96);border-top:2px solid var(--ink);
+    padding:15px 22px;font-family:'Hiragino Kaku Gothic ProN',sans-serif;font-size:13px;line-height:1.7}
+  .cap b{font-family:inherit;color:var(--accent)}
+  .cc{font-size:11px;border:1px solid var(--ink);padding:1px 7px;border-radius:2px;margin:0 2px}
+  .hint{color:var(--dim)}
+  @media(max-width:640px){.nlab{display:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="kicker">Rotordynamics · Technology Roadmap</div>
+  <h1>回転機械の<br>ローターダイナミクス</h1>
+  <p class="dek">社会動向 → 回転機械への需要シフト → ローターダイナミクス課題 → 要素技術。5つのドライバを、近中期（〜2035）と長期（2035〜）の連続時間軸で俯瞰する。</p>
+  <div class="rule"></div>
+  <div class="scale"><span><b>now</b> 2026</span><span>2030</span><span>2035</span><span>2040+</span></div>
+  <div class="chart" id="chart"></div>
+  <div class="legend">
+    <span class="lg"><span class="di" style="background:#1f2420"></span>確立</span>
+    <span class="lg"><span class="di" style="background:#f6f3ec;border:1px solid #1f2420"></span>推定</span>
+    <span class="lg"><span class="di" style="background:#f6f3ec;border:1px dashed #1f2420"></span>仮説</span>
+    <span class="lg">— 実線=〜2035 ／ -- 点線=2035〜</span>
+  </div>
+</div>
+<div class="cap" id="cap"><span class="hint">◆ マイルストーンをタップすると詳細が出ます（技術誌／教科書風モック）</span></div>
+<script src="./_data.js"></script>
+<script>
+  const NOW=2026,END=2040,BREAK=2035,CN={1:'確立',2:'推定',3:'仮説'};
+  const xp=y=>((y-NOW)/(END-NOW)*100);
+  const chart=document.getElementById('chart'),cap=document.getElementById('cap');
+  DATA.forEach((d,i)=>{
+    const lane=document.createElement('div');lane.className='lane';
+    lane.innerHTML=`<div class="lhead"><span class="lnum">${String(i+1).padStart(2,'0')}</span><span class="lname">${d.name}</span><small>${d.short}</small></div>`;
+    const track=document.createElement('div');track.className='track';track.style.setProperty('--bx',xp(BREAK)+'%');
+    d.nodes.forEach(n=>{
+      const b=document.createElement('button');b.className='node c'+n.c;b.style.left=xp(n.y)+'%';b.title=n.t;
+      b.innerHTML=`<span class="mk"></span><span class="nlab">${n.s}</span>`;
+      b.onclick=()=>{cap.innerHTML=`<b>${String(i+1).padStart(2,'0')} ${d.name}</b><span class="cc">${CN[n.c]}</span>${n.y>=BREAK?'2035〜 長期':'〜'+(n.y<2031?'2030':'2035')}<br>${n.t}`;};
+      track.appendChild(b);
+    });
+    lane.appendChild(track);
+    if(i===0){const brk=document.createElement('div');brk.className='brk';brk.style.left=xp(BREAK)+'%';chart.appendChild(brk);}
+    chart.appendChild(lane);
+  });
+  document.querySelector('.brk').style.height=(DATA.length*74)+'px';
+</script>
+</body>
+</html>
