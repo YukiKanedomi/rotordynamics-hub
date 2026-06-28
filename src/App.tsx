@@ -11,13 +11,14 @@ import {
   HORIZONS,
   NARRATIVE,
   ANCHOR,
+  SOLUTIONS,
   type Confidence,
   type Driver,
   type Horizon,
   type Milestone,
 } from './data/roadmap'
 
-type Tab = 'story' | 'timeline' | 'drivers' | 'vectors' | 'rdmap' | 'sources'
+type Tab = 'story' | 'linkage' | 'timeline' | 'drivers' | 'vectors' | 'rdmap' | 'sources'
 
 /* 確度 → クラス（small caps バッジ・ノード形状の両方で使用） */
 const confKey = (c: Confidence) => (c === '確立' ? 'e' : c === '推定' ? 'p' : 'h')
@@ -118,6 +119,7 @@ export default function App() {
       <nav className="tabs">
         {([
           ['story', 'ストーリー'],
+          ['linkage', 'つながり図'],
           ['timeline', 'ロードマップ'],
           ['drivers', '5ドライバ'],
           ['vectors', '共通ベクトル'],
@@ -132,6 +134,7 @@ export default function App() {
 
       <main className="main">
         {tab === 'story' && <StoryView />}
+        {tab === 'linkage' && <LinkageView isMobile={isMobile} />}
         {tab === 'timeline' &&
           (isMobile ? (
             <TimelineMobile
@@ -360,6 +363,152 @@ function StoryView() {
             </div>
           </div>
         ))}
+      </div>
+    </div>
+  )
+}
+
+/* ───────────────────────── つながり図（4層リンク図） ───────────────────────── */
+function LinkageView({ isMobile }: { isMobile: boolean }) {
+  const [sel, setSel] = useState<string | null>(null)
+
+  const { LAYERS, edges, fAdj, bAdj, detailMap } = useMemo(() => {
+    const LAYERS = [
+      { key: 'L1', title: '社会動向', nodes: DRIVERS.map((d) => ({ id: d.id, head: d.id, label: d.name })) },
+      { key: 'L2', title: '回転機械の変化', nodes: VECTORS.map((v) => ({ id: v.id, head: v.id, label: v.name })) },
+      { key: 'L3', title: 'RD課題', nodes: RD_CLUSTERS.map((c) => ({ id: c.key, head: '', label: c.name })) },
+      { key: 'L4', title: '解の方向', nodes: SOLUTIONS.map((s) => ({ id: s.id, head: s.id, label: s.name })) },
+    ]
+    const edges: [string, string][] = []
+    VECTORS.forEach((v) => v.drivers.forEach((d) => edges.push([d, v.id])))
+    RD_CLUSTERS.forEach((c) => (c.cause.match(/V\d/g) || []).forEach((v) => edges.push([v, c.key])))
+    SOLUTIONS.forEach((s) => s.rd.forEach((rd) => edges.push([rd, s.id])))
+    const fAdj: Record<string, string[]> = {}
+    const bAdj: Record<string, string[]> = {}
+    edges.forEach(([a, b]) => {
+      ;(fAdj[a] = fAdj[a] || []).push(b)
+      ;(bAdj[b] = bAdj[b] || []).push(a)
+    })
+    const detailMap: Record<string, { title: string; detail: string; sources: string[] }> = {}
+    DRIVERS.forEach((d) => (detailMap[d.id] = { title: `${d.id}　${d.name}`, detail: d.short, sources: [] }))
+    VECTORS.forEach((v) => (detailMap[v.id] = { title: `${v.id}　${v.name}`, detail: v.detail, sources: v.sources || [] }))
+    RD_CLUSTERS.forEach((c) => (detailMap[c.key] = { title: c.name, detail: c.detail, sources: [] }))
+    SOLUTIONS.forEach((s) => (detailMap[s.id] = { title: `${s.id}　${s.name}`, detail: s.detail, sources: s.sources || [] }))
+    return { LAYERS, edges, fAdj, bAdj, detailMap }
+  }, [])
+
+  const chain = useMemo(() => {
+    if (!sel) return null
+    const nodes = new Set<string>([sel])
+    const es = new Set<string>()
+    let fr = [sel]
+    while (fr.length) {
+      const nx: string[] = []
+      fr.forEach((id) => (fAdj[id] || []).forEach((b) => { es.add(id + '__' + b); if (!nodes.has(b)) { nodes.add(b); nx.push(b) } }))
+      fr = nx
+    }
+    fr = [sel]
+    while (fr.length) {
+      const nx: string[] = []
+      fr.forEach((id) => (bAdj[id] || []).forEach((a) => { es.add(a + '__' + id); if (!nodes.has(a)) { nodes.add(a); nx.push(a) } }))
+      fr = nx
+    }
+    return { nodes, es }
+  }, [sel, fAdj, bAdj])
+
+  const cls = (id: string) => (sel ? (chain && chain.nodes.has(id) ? ' inchain' : ' dim') : '')
+
+  const posMap = useMemo(() => {
+    const COLX = [60, 300, 545, 805], COLW = [150, 160, 195, 180], TOP = 46, H = 580, BOT = 22
+    const m: Record<string, { x: number; cy: number; w: number; xLeft: number; xRight: number }> = {}
+    LAYERS.forEach((L, li) => {
+      const k = L.nodes.length
+      L.nodes.forEach((n, i) => {
+        const cy = TOP + ((H - TOP - BOT) * (i + 0.5)) / k
+        m[n.id] = { x: COLX[li], cy, w: COLW[li], xLeft: COLX[li], xRight: COLX[li] + COLW[li] }
+      })
+    })
+    return m
+  }, [LAYERS])
+
+  const cap = sel ? detailMap[sel] : null
+
+  return (
+    <div className="lk">
+      <div className="figtag">Fig. 2 — 4層リンク図（社会動向 → 機械の変化 → RD課題 → 解の方向）</div>
+      <p className="section-note">
+        Phaal/Cambridge式の多層リンク図。ノードを{isMobile ? 'タップ' : 'クリック'}すると、上流（社会動向）から
+        下流（解）までの<span className="ob">因果の連鎖</span>がハイライトされる。リンクこそが地図の本体。
+      </p>
+
+      {!isMobile ? (
+        <div className="lk-figure">
+          <svg viewBox="0 0 1000 580" className="lk-svg" onClick={() => setSel(null)}>
+            {LAYERS.map((L, li) => (
+              <text key={L.key} x={[135, 380, 642, 895][li]} y={18} className="lk-coltitle" textAnchor="middle">
+                {L.title}
+              </text>
+            ))}
+            {edges.map(([a, b], i) => {
+              const pa = posMap[a], pb = posMap[b]
+              if (!pa || !pb) return null
+              const x1 = pa.xRight, y1 = pa.cy, x2 = pb.xLeft, y2 = pb.cy, mx = (x1 + x2) / 2
+              const on = chain ? chain.es.has(a + '__' + b) : false
+              const off = chain ? !on : false
+              return <path key={i} d={`M${x1},${y1} C${mx},${y1} ${mx},${y2} ${x2},${y2}`} className={'lk-link' + (on ? ' on' : '') + (off ? ' off' : '')} />
+            })}
+            {LAYERS.map((L, li) =>
+              L.nodes.map((n) => {
+                const p = posMap[n.id]
+                return (
+                  <foreignObject key={n.id} x={p.x} y={p.cy - 26} width={p.w} height={52}>
+                    <button
+                      className={'lk-node l' + (li + 1) + (sel === n.id ? ' sel' : '') + cls(n.id)}
+                      onClick={(e) => { e.stopPropagation(); setSel(sel === n.id ? null : n.id) }}
+                    >
+                      {n.head && <span className="lk-head">{n.head}</span>}
+                      <span className="lk-label">{n.label}</span>
+                    </button>
+                  </foreignObject>
+                )
+              }),
+            )}
+          </svg>
+        </div>
+      ) : (
+        <div className="lk-stack">
+          {LAYERS.map((L, li) => (
+            <section className="lk-layer" key={L.key}>
+              <div className="lk-ltitle"><span className="lk-lk">{L.key}</span>{L.title}</div>
+              <div className="lk-row">
+                {L.nodes.map((n) => (
+                  <button
+                    key={n.id}
+                    className={'lk-chip l' + (li + 1) + (sel === n.id ? ' sel' : '') + cls(n.id)}
+                    onClick={() => setSel(sel === n.id ? null : n.id)}
+                  >
+                    {n.head && <b>{n.head}</b>} {n.label}
+                  </button>
+                ))}
+              </div>
+              {li < 3 && <div className="lk-down">↓</div>}
+            </section>
+          ))}
+        </div>
+      )}
+
+      <div className={'lk-cap' + (cap ? ' on' : '')}>
+        {cap ? (
+          <>
+            <strong>{cap.title}</strong>
+            <span className="lk-cap-d">{cap.detail}</span>
+            {cap.sources.length > 0 && (
+              <span className="lk-cap-s">裏付け: <Cite refs={cap.sources} /></span>
+            )}
+          </>
+        ) : (
+          <span className="hint2">ノードを選ぶと、その社会動向→機械→課題→解の連鎖が浮かび上がります。</span>
+        )}
       </div>
     </div>
   )

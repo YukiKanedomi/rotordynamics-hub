@@ -195,6 +195,23 @@ export const ANCHOR = {
   ref: 'ASME-Spakovszky-2023',
 }
 
+// ───────────────────────── 解の方向（リンク図の第4層 L4） ─────────────────────────
+// rd = 対応する横断RD課題クラスタ key（L3→L4 のリンク元）。
+export interface Solution {
+  id: string
+  name: string
+  detail: string
+  rd: string[]
+  sources?: string[]
+}
+export const SOLUTIONS: Solution[] = [
+  { id: 'S1', name: '先進軸受（磁気・ガス/フォイル）', detail: '非接触・油フリー支持。AMBは能動制御で多モードを管理、ガス/フォイル軸受は減衰確保とサブシンクロナス渦動の抑制が要点。', rd: ['stability', 'bearing', 'critspeed'], sources: ['DellaCorte-2012-MSSP', 'MDPI-AMB-Review-2025'] },
+  { id: 'S2', name: 'ダンパシール／スワールブレーキ', detail: '旋回流クロスカップル剛性を低減し最低次モードの減衰比を増す。高密度ガス機の安定性律速に対する直接の解。', rd: ['stability', 'seal'], sources: ['ASME-SwirlBrake-2023', 'Baba-2020-GPPS'] },
+  { id: 'S3', name: '能動振動制御・SFD', detail: '圧電可動SFD等で危険速度通過時の突発不釣合いを抑制、能動制御で軽量柔軟ロータ・電磁連成を安定化。', rd: ['critspeed', 'stability', 'emag'], sources: ['JSV-PiezoSFD-2024', 'SwRI-STEP-Rotordyn-2018'] },
+  { id: 'S4', name: 'UQ・デジタルツイン', detail: '不確かさ定量化と確率論的設計、オンライン推定によりロバスト危険速度・安定性設計と予知保全へ。', rd: ['digital', 'critspeed', 'torsional'], sources: ['Fu-MSSP-UQreview-2023', 'DT-Sensors-2024'] },
+  { id: 'S5', name: '規格整備（API/ISO）', detail: 'API 617/684・ISO 20816/14839 の追従改訂と、油フリー/ガス軸受機を正面から扱う新規格の整備。', rd: ['bearing', 'stability', 'torsional', 'fwbw'], sources: ['ISO20816-1-2016', 'ISO14839-5-2022', 'API-TR684-1-2019'] },
+]
+
 // ───────────────────────── 横断RD課題クラスタ ─────────────────────────
 export const RD_CLUSTERS: RDCluster[] = [
   { key: 'critspeed', name: '危険速度通過・分離余裕', cause: 'V2 超高速', detail: '超臨界運転の起動/停止過渡、SM確保、たわみロータ。', topics: ['separation-margin'] },
