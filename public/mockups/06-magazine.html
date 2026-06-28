@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>モック06 Editorial Magazine／Kinfolk系</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,900&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FAF4E6; --ink:#1A1A1A; --dim:#9b9385; --rule:#e2dac6;
+    --oxblood:#5C1A1B; --navy:#1F3A5F;
+    --disp:'Fraunces',serif;
+    --jp:'Zen Kaku Gothic New',sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--jp);
+    min-height:100vh;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:920px;margin:0 auto;padding:38px 26px 130px}
+  .top{display:flex;justify-content:space-between;align-items:baseline;
+    font-family:var(--disp);font-variant:small-caps;letter-spacing:.16em;font-size:12px;
+    color:var(--oxblood);border-bottom:1px solid var(--ink);padding-bottom:10px}
+  .top .iss{color:var(--dim)}
+  h1{font-family:var(--disp);font-weight:600;font-size:clamp(40px,9vw,82px);line-height:.98;
+    letter-spacing:-.015em;margin:30px 0 0;font-optical-sizing:auto;
+    font-feature-settings:"opsz" 144}
+  h1 em{font-style:italic;font-weight:400;color:var(--oxblood)}
+  .lede{display:grid;grid-template-columns:1fr 1fr;gap:28px;margin:24px 0 6px;align-items:start}
+  .lede p{font-size:14px;line-height:1.95;margin:0;color:#332f28}
+  .lede p.first::first-letter{font-family:var(--disp);font-weight:600;font-size:3.4em;
+    float:left;line-height:.82;padding:6px 10px 0 0;color:var(--oxblood)}
+  .meta{font-family:var(--disp);font-variant:small-caps;letter-spacing:.12em;font-size:12px;
+    color:var(--dim);text-align:right}
+  hr.thin{border:0;border-top:1px solid var(--rule);margin:24px 0 0}
+  .scale{display:flex;justify-content:space-between;font-family:var(--disp);font-size:13px;
+    color:var(--dim);padding:14px 0 4px;font-variant-numeric:lining-nums}
+  .scale b{color:var(--oxblood)}
+  .chart{position:relative}
+  .brk{position:absolute;top:0;border-left:1px solid var(--navy);opacity:.45;z-index:1}
+  .brk::after{content:'2035';font-family:var(--disp);font-variant:small-caps;letter-spacing:.1em;
+    font-size:11px;color:var(--navy);position:absolute;top:0;left:6px}
+  .lane{position:relative;height:82px;border-bottom:1px solid var(--rule)}
+  .lhead{position:absolute;left:0;top:14px;z-index:3}
+  .lnum{font-family:var(--disp);font-size:13px;color:var(--oxblood);margin-right:9px;font-variant-numeric:lining-nums}
+  .lname{font-family:var(--disp);font-weight:600;font-size:19px;letter-spacing:-.01em}
+  .lhead small{display:block;font-size:11px;color:var(--dim);margin:2px 0 0;letter-spacing:.02em}
+  .track{position:absolute;left:0;right:6px;top:52px;height:1.5px;background:var(--ink)}
+  .track::after{content:'';position:absolute;left:var(--bx,64%);right:0;top:0;
+    border-top:1.5px dotted var(--dim)}
+  .node{position:absolute;transform:translate(-50%,-50%);top:.75px;background:none;border:0;cursor:pointer;padding:0}
+  .mk{display:block;width:13px;height:13px;border-radius:50%;background:var(--ink)}
+  .c2 .mk{background:var(--paper);border:2px solid var(--ink)}
+  .c3 .mk{background:var(--paper);border:2px solid var(--oxblood);border-style:dotted}
+  .nlab{position:absolute;left:50%;transform:translateX(-50%);top:13px;white-space:nowrap;
+    font-size:11px;color:var(--dim)}
+  .node:hover .mk{background:var(--oxblood);border-color:var(--oxblood)}
+  .node:hover .nlab{color:var(--ink)}
+  .legend{font-family:var(--disp);font-variant:small-caps;letter-spacing:.08em;font-size:12.5px;
+    color:var(--dim);display:flex;gap:20px;flex-wrap:wrap;margin-top:20px}
+  .lg{display:flex;align-items:center;gap:8px}
+  .di{width:12px;height:12px;border-radius:50%}
+  .cap{position:fixed;left:0;right:0;bottom:0;background:rgba(250,244,230,.97);border-top:1px solid var(--ink);
+    padding:16px 24px;font-size:13.5px;line-height:1.75}
+  .cap b{font-family:var(--disp);font-weight:600;font-size:16px;color:var(--oxblood)}
+  .cc{font-family:var(--disp);font-variant:small-caps;letter-spacing:.06em;font-size:12px;
+    border:1px solid var(--ink);padding:0 8px;margin:0 8px 0 4px;border-radius:2px}
+  .hint{color:var(--dim)}
+  @media(max-width:680px){.lede{grid-template-columns:1fr}.meta{text-align:left}.nlab{display:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><span>Rotordynamics Hub</span><span class="iss">Roadmap · No. 01 · 2026</span></div>
+  <h1>Rotordynamics,<br><em>a roadmap</em></h1>
+  <div class="lede">
+    <p class="first">回転機械はいま、電動化・脱炭素・AIという大きな潮流のなかで、油フリー化・超高速化・モータ一体化へと姿を変えつつある。その変化は、危険速度や安定性といったローターダイナミクスの古くて新しい課題を呼び戻す。</p>
+    <p>本ロードマップは、5つの社会的ドライバを連続した時間軸の上に置き、いつ・どの技術を確立すべきかを描く。<span class="meta">5 Drivers · 2026 — 2040</span></p>
+  </div>
+  <hr class="thin">
+  <div class="scale"><span><b>now</b> 2026</span><span>2030</span><span>2035</span><span>2040+</span></div>
+  <div class="chart" id="chart"></div>
+  <div class="legend">
+    <span class="lg"><span class="di" style="background:#1A1A1A"></span>確立 established</span>
+    <span class="lg"><span class="di" style="background:#FAF4E6;border:2px solid #1A1A1A"></span>推定 estimated</span>
+    <span class="lg"><span class="di" style="background:#FAF4E6;border:2px dotted #5C1A1B"></span>仮説 hypothesis</span>
+  </div>
+</div>
+<div class="cap" id="cap"><span class="hint">● マイルストーンをタップすると詳細が表示されます（Editorial Magazine／Kinfolk系モック）</span></div>
+<script src="./_data.js"></script>
+<script>
+  const NOW=2026,END=2040,BREAK=2035,CN={1:'確立',2:'推定',3:'仮説'};
+  const xp=y=>((y-NOW)/(END-NOW)*100);
+  const chart=document.getElementById('chart'),cap=document.getElementById('cap');
+  DATA.forEach((d,i)=>{
+    const lane=document.createElement('div');lane.className='lane';
+    lane.innerHTML=`<div class="lhead"><span class="lnum">0${i+1}</span><span class="lname">${d.name}</span><small>${d.short}</small></div>`;
+    const track=document.createElement('div');track.className='track';track.style.setProperty('--bx',xp(BREAK)+'%');
+    d.nodes.forEach(n=>{
+      const b=document.createElement('button');b.className='node c'+n.c;b.style.left=xp(n.y)+'%';b.title=n.t;
+      b.innerHTML=`<span class="mk"></span><span class="nlab">${n.s}</span>`;
+      b.onclick=()=>{cap.innerHTML=`<b>0${i+1} ${d.name}</b><span class="cc">${CN[n.c]}</span>${n.y>=BREAK?'2035〜 長期':'〜'+(n.y<2031?'2030':'2035')}<br>${n.t}`;};
+      track.appendChild(b);
+    });
+    lane.appendChild(track);
+    if(i===0){const brk=document.createElement('div');brk.className='brk';brk.style.left=xp(BREAK)+'%';brk.style.height=(DATA.length*82)+'px';chart.appendChild(brk);}
+    chart.appendChild(lane);
+  });
+</script>
+</body>
+</html>

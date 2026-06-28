@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>モック07 Monospace-Editorial</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Shippori+Mincho:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F8F5EE; --ink:#3A2E20; --dim:#9a8f7c; --rule:#e0d9cb;
+    --teal:#0F4C4C; --oxblood:#4A0404;
+    --mono:'IBM Plex Mono',monospace;
+    --jp:'Shippori Mincho',serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--mono);
+    min-height:100vh;-webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums}
+  .wrap{max-width:920px;margin:0 auto;padding:30px 24px 130px}
+  .bar{display:flex;justify-content:space-between;align-items:center;font-family:var(--mono);
+    font-size:11px;letter-spacing:.08em;color:var(--teal);border:1px solid var(--rule);
+    border-radius:6px;padding:8px 12px;background:rgba(15,76,76,.04)}
+  .bar .dotted::before{content:'● ';color:var(--teal)}
+  .bar .r{color:var(--dim)}
+  h1{font-family:var(--mono);font-weight:600;font-size:clamp(22px,4.6vw,34px);letter-spacing:-.01em;
+    margin:22px 0 4px;line-height:1.1}
+  .path{font-family:var(--mono);font-size:12px;color:var(--dim);letter-spacing:.02em}
+  .lede{font-family:var(--jp);font-size:14.5px;line-height:1.95;color:#4a3e2e;max-width:600px;margin:16px 0 0}
+  .pipe{font-family:var(--mono);font-size:11.5px;color:var(--teal);letter-spacing:.04em;
+    margin:16px 0 0;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .pipe span{background:rgba(15,76,76,.07);padding:3px 9px;border-radius:4px}
+  .pipe i{color:var(--dim);font-style:normal}
+  .hr{border-top:1px dashed var(--rule);margin:22px 0 0}
+  .scale{display:flex;justify-content:space-between;font-family:var(--mono);font-size:12px;
+    color:var(--dim);letter-spacing:.04em;padding:14px 0 4px;border-bottom:1px solid var(--rule)}
+  .scale b{color:var(--teal)}
+  .chart{position:relative}
+  .brk{position:absolute;top:0;border-left:1px dashed var(--oxblood);opacity:.5;z-index:1}
+  .brk::after{content:'2035';font-family:var(--mono);font-size:10px;color:var(--oxblood);
+    position:absolute;top:2px;left:5px}
+  .lane{position:relative;height:74px;border-bottom:1px solid var(--rule)}
+  .lhead{position:absolute;left:0;top:11px;z-index:3}
+  .lid{font-family:var(--mono);color:var(--teal);font-weight:600;font-size:12px;letter-spacing:.04em}
+  .lname{font-family:var(--mono);font-weight:500;font-size:13.5px;margin-left:7px}
+  .lhead small{display:block;font-family:var(--jp);font-size:11.5px;color:var(--dim);margin:3px 0 0}
+  .track{position:absolute;left:2px;right:6px;top:46px;height:1px;background:var(--ink)}
+  .track::after{content:'';position:absolute;left:var(--bx,64%);right:0;top:0;border-top:1px dashed var(--dim)}
+  .node{position:absolute;transform:translate(-50%,-50%);top:.5px;background:none;border:0;cursor:pointer;padding:0}
+  .mk{display:block;width:12px;height:12px;background:var(--teal);border:1.5px solid var(--teal)}
+  .c2 .mk{background:var(--paper)}
+  .c3 .mk{background:var(--paper);border-color:var(--oxblood);border-style:dashed;transform:rotate(45deg)}
+  .nlab{position:absolute;left:50%;transform:translateX(-50%);top:13px;white-space:nowrap;
+    font-family:var(--mono);font-size:10px;color:var(--dim);letter-spacing:.01em}
+  .node:hover .mk{box-shadow:0 0 0 3px rgba(15,76,76,.15)}
+  .node:hover .nlab{color:var(--ink)}
+  .legend{font-family:var(--mono);font-size:11px;color:var(--dim);display:flex;gap:16px;
+    flex-wrap:wrap;margin-top:18px;letter-spacing:.03em}
+  .lg{display:flex;align-items:center;gap:7px}
+  .di{width:11px;height:11px}
+  .cap{position:fixed;left:0;right:0;bottom:0;background:rgba(248,245,238,.97);border-top:1px solid var(--teal);
+    padding:15px 22px;line-height:1.7}
+  .cap b{font-family:var(--mono);font-weight:600;font-size:13px;color:var(--teal);letter-spacing:.02em}
+  .cap .body{font-family:var(--jp);font-size:14px;margin-top:3px;display:block}
+  .cc{font-family:var(--mono);font-size:10px;border:1px solid var(--teal);color:var(--teal);
+    padding:1px 6px;margin:0 8px 0 4px}
+  .cc.c3{border-color:var(--oxblood);color:var(--oxblood)}
+  .hint{font-family:var(--mono);color:var(--dim);font-size:12px}
+  @media(max-width:660px){.nlab{display:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="bar"><span class="dotted">ROTORDYNAMICS HUB</span><span class="r">roadmap · v0 · 2026—2040</span></div>
+  <h1>technology roadmap</h1>
+  <div class="path">~/rotordynamics/knowledge/roadmap.md</div>
+  <p class="lede">社会動向から回転機械への需要シフトを読み、そこに生じるローターダイナミクスの課題と、それに応える要素技術の整備時期を一枚に。等幅で年次と指標を締め、明朝で読ませる。</p>
+  <div class="pipe"><span>社会動向</span><i>→</i><span>需要シフト</span><i>→</i><span>RD課題</span><i>→</i><span>要素技術</span></div>
+  <div class="hr"></div>
+  <div class="scale"><span><b>now</b> 2026</span><span>2030</span><span>2035</span><span>2040+</span></div>
+  <div class="chart" id="chart"></div>
+  <div class="legend">
+    <span class="lg"><span class="di" style="background:#0F4C4C"></span>確立 established</span>
+    <span class="lg"><span class="di" style="background:#F8F5EE;border:1.5px solid #0F4C4C"></span>推定 estimated</span>
+    <span class="lg"><span class="di" style="background:#F8F5EE;border:1.5px dashed #4A0404;transform:rotate(45deg)"></span>仮説 hypothesis</span>
+    <span class="lg">── 〜2035 / ┄┄ 2035〜</span>
+  </div>
+</div>
+<div class="cap" id="cap"><span class="hint">[ ] ノードをタップすると詳細が表示されます（Monospace-Editorial モック）</span></div>
+<script src="./_data.js"></script>
+<script>
+  const NOW=2026,END=2040,BREAK=2035,CN={1:'確立',2:'推定',3:'仮説'};
+  const xp=y=>((y-NOW)/(END-NOW)*100);
+  const chart=document.getElementById('chart'),cap=document.getElementById('cap');
+  DATA.forEach(d=>{
+    const lane=document.createElement('div');lane.className='lane';
+    lane.innerHTML=`<div class="lhead"><span class="lid">[${d.id}]</span><span class="lname">${d.name}</span><small>${d.short}</small></div>`;
+    const track=document.createElement('div');track.className='track';track.style.setProperty('--bx',xp(BREAK)+'%');
+    d.nodes.forEach(n=>{
+      const b=document.createElement('button');b.className='node c'+n.c;b.style.left=xp(n.y)+'%';b.title=n.t;
+      b.innerHTML=`<span class="mk"></span><span class="nlab">${n.s}</span>`;
+      b.onclick=()=>{cap.innerHTML=`<b>[${d.id}] ${d.name}</b><span class="cc c${n.c}">${CN[n.c]}</span>${n.y>=BREAK?'2035〜 長期':'〜'+(n.y<2031?'2030':'2035')}<span class="body">${n.t}</span>`;};
+      track.appendChild(b);
+    });
+    lane.appendChild(track);
+    if(d===DATA[0]){const brk=document.createElement('div');brk.className='brk';brk.style.left=xp(BREAK)+'%';brk.style.height=(DATA.length*74)+'px';chart.appendChild(brk);}
+    chart.appendChild(lane);
+  });
+</script>
+</body>
+</html>

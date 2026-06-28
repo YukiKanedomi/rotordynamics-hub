@@ -4,53 +4,86 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>デザイン・モック比較 — Rotordynamics Hub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Zen+Kaku+Gothic+New:wght@400;500&display=swap" rel="stylesheet">
 <style>
+  :root{--paper:#FAF4E6;--ink:#1f1b16;--dim:#9b9385;--rule:#e2dac6;--ox:#5C1A1B;
+    --disp:'Fraunces',serif;--jp:'Zen Kaku Gothic New',sans-serif}
   *{box-sizing:border-box}
-  body{margin:0;background:#0f172a;color:#e2e8f0;font-family:'Hiragino Kaku Gothic ProN','Yu Gothic',system-ui,sans-serif;min-height:100vh}
-  .wrap{max-width:680px;margin:0 auto;padding:30px 18px 60px}
-  h1{font-size:20px;margin:0 0 4px}
-  p.lead{color:#94a3b8;font-size:13px;line-height:1.7;margin:0 0 22px}
-  a.card{display:block;text-decoration:none;color:inherit;border:1px solid #233047;border-radius:14px;
-    padding:16px 18px;margin-bottom:14px;background:#16213a;transition:.15s}
-  a.card:hover{border-color:#38bdf8;transform:translateY(-2px)}
-  .row{display:flex;align-items:center;gap:12px}
-  .sw{width:54px;height:40px;border-radius:8px;flex:0 0 auto;border:1px solid #2a3a55}
-  .t{font-size:15px;font-weight:700}
-  .d{font-size:12px;color:#94a3b8;margin-top:5px;line-height:1.6}
-  .num{font-size:11px;color:#64748b;letter-spacing:.1em}
-  .s1{background:radial-gradient(circle at 70% 20%,#22d3ee55,#070b14)}
-  .s2{background:linear-gradient(120deg,#f6f3ec,#e7e0d2)}
-  .s3{background:linear-gradient(120deg,#fff,#f2f2f2);border-color:#ddd}
-  .s4{background:linear-gradient(160deg,#0d3b66,#0a2f52)}
-  .foot{color:#64748b;font-size:11.5px;margin-top:18px;line-height:1.7}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--jp);min-height:100vh}
+  .wrap{max-width:720px;margin:0 auto;padding:34px 20px 70px}
+  .kick{font-family:var(--disp);font-variant:small-caps;letter-spacing:.16em;font-size:12px;color:var(--ox)}
+  h1{font-family:var(--disp);font-weight:600;font-size:30px;margin:6px 0 4px;line-height:1.1}
+  p.lead{color:#544c3e;font-size:13.5px;line-height:1.8;margin:0 0 8px}
+  h2{font-family:var(--disp);font-weight:600;font-size:16px;margin:30px 0 4px;
+    border-bottom:1px solid var(--ink);padding-bottom:6px;display:flex;justify-content:space-between;align-items:baseline}
+  h2 small{font-family:var(--jp);font-weight:400;font-size:11px;color:var(--dim)}
+  a.card{display:block;text-decoration:none;color:inherit;border:1px solid var(--rule);border-radius:12px;
+    padding:14px 16px;margin-top:12px;background:#fffdf7;transition:.15s}
+  a.card:hover{border-color:var(--ox);transform:translateY(-2px)}
+  .row{display:flex;align-items:center;gap:13px}
+  .sw{width:58px;height:42px;border-radius:8px;flex:0 0 auto;border:1px solid var(--rule);position:relative;overflow:hidden}
+  .num{font-family:var(--disp);font-size:11px;color:var(--dim);letter-spacing:.08em}
+  .t{font-family:var(--disp);font-size:16px;font-weight:600}
+  .star{color:var(--ox);font-size:11px;margin-left:6px}
+  .d{font-size:12px;color:#6b6354;margin-top:6px;line-height:1.65}
+  /* swatches */
+  .a5{background:#F4ECD8}.a5::after{content:'';position:absolute;left:8px;right:8px;top:19px;height:1px;background:#2B2B2B}
+  .a5 i{position:absolute;width:7px;height:7px;border-radius:50%;background:#1E4D2B;top:16px;left:14px}
+  .a6{background:#FAF4E6}.a6::before{content:'Aa';position:absolute;left:7px;top:4px;font-family:var(--disp);font-size:20px;color:#5C1A1B;font-weight:600}
+  .a7{background:#F8F5EE}.a7::after{content:'</>';position:absolute;left:9px;top:13px;font-family:monospace;font-size:12px;color:#0F4C4C}
+  .b1{background:radial-gradient(circle at 70% 20%,#22d3ee55,#070b14)}
+  .b2{background:linear-gradient(120deg,#f6f3ec,#e7e0d2)}
+  .b3{background:linear-gradient(120deg,#fff,#f1f1f1)}
+  .b4{background:linear-gradient(160deg,#0d3b66,#0a2f52)}
+  .foot{color:var(--dim);font-size:11.5px;margin-top:26px;line-height:1.8;border-top:1px solid var(--rule);padding-top:12px}
+  .foot a{color:var(--ox)}
 </style>
 </head>
 <body>
 <div class="wrap">
+  <div class="kick">Rotordynamics Hub · Design Studies</div>
   <h1>デザイン・モック比較</h1>
-  <p class="lead">同じロードマップ（5ドライバ×連続時間軸＋ノード）を、4つのビジュアル方向で描き分けました。スマホで開いて、ノードをタップ→下部に詳細が出ます。気に入った方向（や「ここはAの色＋Bの組版」等の混ぜ方）を教えてください。</p>
+  <p class="lead">同じロードマップ（5ドライバ×連続時間軸＋ノード）を別スキンで描いています。ノードをタップ→下部に詳細。気に入った方向や「ここはAの色×Bの組版」等の混ぜ方を教えてください。</p>
 
-  <a class="card" href="./01-oscilloscope.html">
-    <div class="row"><span class="sw s1"></span><div><span class="num">MOCK 01</span><div class="t">計器盤／オシロスコープ風</div></div></div>
-    <div class="d">ダーク背景＋cyan/amberの発光、Campbell線図風グリッドと波形。振動・スペクトルの世界観と最も響き合う。</div>
+  <h2>教科書／技術誌 系・精緻版 <small>暖色ペーパー・Google Fonts・推奨</small></h2>
+
+  <a class="card" href="./07-mono.html">
+    <div class="row"><span class="sw a7"></span><div><span class="num">MOCK 07</span><div class="t">Monospace-Editorial<span class="star">★最推奨</span></div></div></div>
+    <div class="d">IBM Plex Mono（見出し・年次）×明朝（本文）。等幅で data を締め、明朝で読ませる「technical magazine」。地=soft paper＋deep teal。技術ロードマップに直結。</div>
   </a>
+
+  <a class="card" href="./05-academic.html">
+    <div class="row"><span class="sw a5"><i></i></span><div><span class="num">MOCK 05</span><div class="t">Academic Paper／Tufte系</div></div></div>
+    <div class="d">Newsreader×Shippori Mincho、傍注・脚注・図番・古典数字。検証可能性を重んじる「育つ教科書」の佇まい。地=sepia textbook＋forest。</div>
+  </a>
+
+  <a class="card" href="./06-magazine.html">
+    <div class="row"><span class="sw a6"></span><div><span class="num">MOCK 06</span><div class="t">Editorial Magazine／Kinfolk系</div></div></div>
+    <div class="d">Fraunces大見出し＋ドロップキャップ＋スモールキャップス。余白広めで「読ませる・見せる」。対外プレゼン向き。地=classic journal＋oxblood。</div>
+  </a>
+
+  <h2>第1案・方向比較 <small>最初の4方向</small></h2>
 
   <a class="card" href="./02-editorial.html">
-    <div class="row"><span class="sw s2"></span><div><span class="num">MOCK 02</span><div class="t">技術誌／教科書風</div></div></div>
-    <div class="d">クリーム紙＋明朝見出し＋細い罫線。落ち着いた1色アクセント。印刷された工学ハンドブックの品位。</div>
+    <div class="row"><span class="sw b2"></span><div><span class="num">MOCK 02</span><div class="t">技術誌／教科書風（初版）</div></div></div>
+    <div class="d">最初に選んでもらった方向の元案。05〜07はこれを精緻化したもの。</div>
   </a>
-
+  <a class="card" href="./01-oscilloscope.html">
+    <div class="row"><span class="sw b1"></span><div><span class="num">MOCK 01</span><div class="t">計器盤／オシロスコープ風</div></div></div>
+    <div class="d">ダーク＋発光。題材性は高いが今回の方向（暖色）とは別系統。</div>
+  </a>
   <a class="card" href="./03-swiss.html">
-    <div class="row"><span class="sw s3"></span><div><span class="num">MOCK 03</span><div class="t">Swiss／連続時間軸</div></div></div>
-    <div class="d">白背景・極太サンセリフ・厳格グリッド。時間軸の目盛と縦罫が効いた、精密なインフォグラフィック。</div>
+    <div class="row"><span class="sw b3"></span><div><span class="num">MOCK 03</span><div class="t">Swiss／連続時間軸</div></div></div>
+    <div class="d">白＋極太サンセリフ＋厳格グリッド。</div>
   </a>
-
   <a class="card" href="./04-blueprint.html">
-    <div class="row"><span class="sw s4"></span><div><span class="num">MOCK 04</span><div class="t">Blueprint／設計図風</div></div></div>
-    <div class="d">青焼き＋方眼＋寸法線・注記・図番枠。エンジニアリング・ドローイングの手触り。</div>
+    <div class="row"><span class="sw b4"></span><div><span class="num">MOCK 04</span><div class="t">Blueprint／設計図風</div></div></div>
+    <div class="d">青焼き＋方眼＋寸法線。</div>
   </a>
 
-  <div class="foot">確度: 塗り=確立／白抜き=推定／破線=仮説。実線=〜2035・点線=2035〜。<br>本番アプリ本体: <a href="../" style="color:#38bdf8">../（現行版）</a></div>
+  <div class="foot">確度: 塗り=確立／白抜き=推定／破線=仮説。実線=〜2035・点線=2035〜。<br>本番アプリ本体: <a href="../">../（現行版）</a></div>
 </div>
 </body>
 </html>
