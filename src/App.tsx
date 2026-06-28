@@ -1,4 +1,4 @@
-import { useMemo, useState, type CSSProperties } from 'react'
+import { useEffect, useMemo, useState, type CSSProperties } from 'react'
 import {
   DRIVERS,
   VECTORS,
@@ -75,7 +75,21 @@ function packRows<T extends { x: number }>(nodes: T[]): (T & { row: number })[] 
   })
 }
 
+/* ブレークポイント判定（モバイル=縦リフロー / デスクトップ=横スイムレーン） */
+function useIsMobile() {
+  const q = '(max-width: 760px)'
+  const [m, setM] = useState(() => typeof window !== 'undefined' && window.matchMedia(q).matches)
+  useEffect(() => {
+    const mq = window.matchMedia(q)
+    const h = () => setM(mq.matches)
+    mq.addEventListener('change', h)
+    return () => mq.removeEventListener('change', h)
+  }, [])
+  return m
+}
+
 export default function App() {
+  const isMobile = useIsMobile()
   const [tab, setTab] = useState<Tab>('timeline')
   const [active, setActive] = useState<{ m: Milestone; driver: Driver } | null>(null)
   const [rdFilter, setRdFilter] = useState<string | null>(null)
@@ -113,13 +127,20 @@ export default function App() {
       </nav>
 
       <main className="main">
-        {tab === 'timeline' && (
-          <TimelineView
-            rdFilter={rdFilter}
-            setRdFilter={setRdFilter}
-            onPick={(m, driver) => setActive({ m, driver })}
-          />
-        )}
+        {tab === 'timeline' &&
+          (isMobile ? (
+            <TimelineMobile
+              rdFilter={rdFilter}
+              setRdFilter={setRdFilter}
+              onPick={(m, driver) => setActive({ m, driver })}
+            />
+          ) : (
+            <TimelineView
+              rdFilter={rdFilter}
+              setRdFilter={setRdFilter}
+              onPick={(m, driver) => setActive({ m, driver })}
+            />
+          ))}
         {tab === 'drivers' && <DriversView onPick={(m, driver) => setActive({ m, driver })} />}
         {tab === 'vectors' && <VectorsView />}
         {tab === 'rdmap' && (
@@ -259,6 +280,90 @@ function TimelineView({
         <span className="lg"><span className="di di-p" />推定</span>
         <span className="lg"><span className="di di-h" />仮説</span>
         <span className="lg lg-line">── 〜2035 ／ ┄┄ 2035〜</span>
+      </div>
+    </div>
+  )
+}
+
+/* ───────────────────────── ロードマップ（モバイル＝縦リフロー） ───────────────────────── */
+const HLABEL: Record<Horizon, string> = {
+  '〜2030': '近中期 前半',
+  '〜2035': '近中期',
+  '2035〜': '長期・シナリオ',
+}
+function TimelineMobile({
+  rdFilter,
+  setRdFilter,
+  onPick,
+}: {
+  rdFilter: string | null
+  setRdFilter: (k: string | null) => void
+  onPick: (m: Milestone, d: Driver) => void
+}) {
+  return (
+    <div className="tl">
+      <div className="figtag">Fig. 1 — 5 Drivers × Timeline</div>
+      <p className="section-note">
+        時間に沿って技術マイルストーンを縦に配置。各カードは担当ドライバ（色・記号）で色分け。
+        <span className="ob">塗り＝確立</span>、白抜き＝推定、破線＝仮説。下のタグで絞り込み、カードのタップで詳細。
+      </p>
+
+      <div className="filterbar">
+        <span className="filter-label">RD課題で絞り込み</span>
+        <button className={rdFilter === null ? 'chip-f on' : 'chip-f'} onClick={() => setRdFilter(null)}>
+          すべて
+        </button>
+        {RD_CLUSTERS.map((c) => (
+          <button
+            key={c.key}
+            className={rdFilter === c.key ? 'chip-f on' : 'chip-f'}
+            style={rdFilter === c.key ? { background: RD_COLORS[c.key], borderColor: RD_COLORS[c.key], color: '#fff' } : {}}
+            onClick={() => setRdFilter(rdFilter === c.key ? null : c.key)}
+          >
+            {c.name}
+          </button>
+        ))}
+      </div>
+
+      <div className="vtl">
+        {HORIZONS.map((h) => {
+          const items = DRIVERS.flatMap((d) =>
+            d.milestones.filter((m) => m.horizon === h).map((m) => ({ m, d })),
+          ).filter(({ m }) => !rdFilter || m.rd.includes(rdFilter))
+          return (
+            <section className={'vt-sec' + (h === '2035〜' ? ' future' : '')} key={h}>
+              <div className="vt-head">
+                <span className="vt-node" />
+                <span className="vt-h">{h}</span>
+                <small>{HLABEL[h]}</small>
+              </div>
+              <div className="vt-list">
+                {items.length === 0 && <p className="vt-empty">該当なし</p>}
+                {items.map(({ m, d }) => (
+                  <button
+                    key={m.id}
+                    className="vt-card"
+                    style={{ borderLeftColor: RD_COLORS[m.rd[0]] ?? '#999' }}
+                    onClick={() => onPick(m, d)}
+                  >
+                    <span className="vt-row">
+                      <span className="vt-driver">{d.icon} {d.id} {d.name}</span>
+                      <span className={confClass(m.confidence)}>{m.confidence}</span>
+                    </span>
+                    <span className="vt-title">{m.title}</span>
+                  </button>
+                ))}
+              </div>
+            </section>
+          )
+        })}
+      </div>
+
+      <div className="legend">
+        <span className="lg"><span className="di di-e" />確立</span>
+        <span className="lg"><span className="di di-p" />推定</span>
+        <span className="lg"><span className="di di-h" />仮説</span>
+        <span className="lg lg-line">● 〜2035 ／ ◌ 2035〜（破線レール）</span>
       </div>
     </div>
   )

@@ -147,6 +147,38 @@ sup { color: var(--accent); }
   line-height: 1.7; margin: 12px 0 0;
 }
 
+/* ───── timeline (mobile vertical reflow) ───── */
+.vtl { position: relative; margin-top: 6px; }
+.vt-sec { position: relative; padding-left: 24px; }
+.vt-sec::before { /* 時間の背骨（レール） */
+  content: ''; position: absolute; left: 7px; top: 0; bottom: 0;
+  border-left: 2px solid var(--ink);
+}
+.vt-sec.future::before { border-left-style: dashed; border-color: var(--accent-2); opacity: .7; }
+.vt-sec:last-child::before { bottom: auto; height: 34px; }
+.vt-head {
+  position: sticky; top: 0; z-index: 3; background: var(--paper);
+  display: flex; align-items: baseline; gap: 9px; padding: 14px 0 9px;
+}
+.vt-node {
+  position: absolute; left: -23px; top: 16px; width: 14px; height: 14px; border-radius: 50%;
+  background: var(--ink); border: 2px solid var(--paper);
+}
+.vt-sec.future .vt-node { background: var(--paper); border-color: var(--accent-2); border-style: dashed; }
+.vt-h { font-family: var(--font-display); font-weight: 600; font-size: 19px; color: var(--ink); }
+.vt-head small { font-family: var(--font-mono); font-size: 11px; letter-spacing: .03em; color: var(--dim); }
+.vt-list { display: flex; flex-direction: column; gap: 9px; padding-bottom: 14px; }
+.vt-card {
+  text-align: left; background: var(--paper-raise); border: 1px solid var(--rule);
+  border-left: 3px solid var(--ink); border-radius: 0 10px 10px 0; padding: 11px 13px;
+  cursor: pointer; display: flex; flex-direction: column; gap: 6px; transition: .12s;
+}
+.vt-card:active { background: var(--paper-sink); }
+.vt-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.vt-driver { font-family: var(--font-mono); font-size: 11px; color: var(--ink-soft); letter-spacing: .01em; }
+.vt-title { font-size: 13.5px; line-height: 1.55; color: var(--ink); }
+.vt-empty { color: var(--dim); font-style: italic; font-size: 12.5px; padding: 2px 0 10px; }
+
 .legend {
   display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
   font-family: var(--font-display); font-size: 13px; color: var(--dim); margin-top: 18px;
