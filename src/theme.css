@@ -1,0 +1,40 @@
+/* ============================================================
+   Theme: "Academic Journal" （他プロジェクト流用可能なデザイン資産）
+   - 構造/組版: Academic Paper（Tufte系） — 明朝×セリフ×等幅、傍注・図番・古典数字
+   - 配色: Classic journal — cream paper + 暖インク + oxblood / navy
+   暖色ペーパー系。アクセントは cream 上で本文可（AAA: oxblood 11.8:1 / navy 10.5:1）。
+   ochre/mustard 系は装飾専用（--fill-* 以下）。data-theme で差し替え可能な設計。
+   ============================================================ */
+:root {
+  /* ---- color ---- */
+  --paper:        #FAF4E6;  /* 地（aged cream） */
+  --paper-raise:  #FFFDF7;  /* カード等の起き上がり面 */
+  --paper-sink:   #F3EAD3;  /* 沈み込み・帯 */
+  --ink:          #1A1A1A;  /* 本文（純黒回避） */
+  --ink-soft:     #3C362C;  /* 副次テキスト */
+  --dim:          #9B9385;  /* 傍注・キャプション */
+  --rule:         #E2DAC6;  /* hairline 罫 */
+  --rule-ink:     #1A1A1A;  /* 強い罫・二重罫 */
+  --accent:       #5C1A1B;  /* oxblood（リンク・見出し・確立。text AAA） */
+  --accent-2:     #1F3A5F;  /* navy（副アクセント。text AAA） */
+  --accent-soft:  #F0E3DC;  /* oxblood tint（淡塗り） */
+  --navy-soft:    #E3E8F0;  /* navy tint */
+
+  /* 確度（confidence） */
+  --c-est:  var(--accent);   /* 確立 = oxblood */
+  --c-prob: var(--ink);      /* 推定 = ink */
+  --c-hyp:  var(--accent-2); /* 仮説 = navy */
+
+  /* ---- type ---- */
+  --font-display: 'Newsreader','Shippori Mincho',serif; /* Latin見出し・数値（opsz・古典数字） */
+  --font-jp:      'Shippori Mincho',serif;              /* 日本語本文（明朝） */
+  --font-mono:    'JetBrains Mono',ui-monospace,monospace; /* data・ラベル・脚注 */
+
+  /* ---- spacing scale（4px グリッド近似） ---- */
+  --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:24px; --s6:32px; --s7:48px; --s8:64px;
+  --radius:10px; --radius-lg:14px;
+
+  /* ---- rules ---- */
+  --hair:1px solid var(--rule);
+  --maxw:980px;
+}

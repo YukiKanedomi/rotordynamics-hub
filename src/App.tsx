@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useState, type CSSProperties } from 'react'
 import {
   DRIVERS,
   VECTORS,
@@ -8,29 +8,54 @@ import {
   SOURCE_MAP,
   TOPIC_MAP,
   HORIZONS,
-  isDotted,
   type Confidence,
   type Driver,
+  type Horizon,
   type Milestone,
 } from './data/roadmap'
 
 type Tab = 'timeline' | 'drivers' | 'vectors' | 'rdmap' | 'sources'
 
-const KNOWLEDGE_NOTE =
-  'このハブは experts/rotordynamics の知識ベースを土台に、社会動向と調査結果をひも付けた技術ロードマップです。'
+/* 確度 → クラス（small caps バッジ・ノード形状の両方で使用） */
+const confKey = (c: Confidence) => (c === '確立' ? 'e' : c === '推定' ? 'p' : 'h')
+const confClass = (c: Confidence) => 'conf c-' + confKey(c)
 
-const confClass = (c: Confidence) =>
-  c === '確立' ? 'conf conf-est' : c === '推定' ? 'conf conf-prob' : 'conf conf-hyp'
-
+/* 横断RD課題の色（cream 上で成立する muted な編集色） */
 const RD_COLORS: Record<string, string> = {
-  critspeed: '#2563eb',
-  stability: '#dc2626',
-  emag: '#7c3aed',
-  torsional: '#d97706',
-  bearing: '#0891b2',
-  seal: '#16a34a',
-  fwbw: '#db2777',
-  digital: '#475569',
+  critspeed: '#1F3A5F',
+  stability: '#5C1A1B',
+  emag: '#5B2A4A',
+  torsional: '#8A5A16',
+  bearing: '#0F4C4C',
+  seal: '#2E5E3A',
+  fwbw: '#6B3F2A',
+  digital: '#44505C',
+}
+
+/* ───── 連続時間軸: horizon を年バンドに割り付け、バンド内で等間隔配置 ───── */
+const NOW = 2026,
+  END = 2041,
+  BREAK = 2035
+const xp = (y: number) => ((y - NOW) / (END - NOW)) * 100
+const BAND: Record<Horizon, [number, number]> = {
+  '〜2030': [2026, 2030],
+  '〜2035': [2030, 2035],
+  '2035〜': [2035, 2041],
+}
+function nodesOf(d: Driver): { m: Milestone; yr: number }[] {
+  const out: { m: Milestone; yr: number }[] = []
+  HORIZONS.forEach((h) => {
+    const ms = d.milestones.filter((m) => m.horizon === h)
+    const [a, b] = BAND[h]
+    const pad = (b - a) * 0.2
+    const lo = a + pad,
+      hi = b - pad
+    ms.forEach((m, i) => {
+      const yr = ms.length === 1 ? (lo + hi) / 2 : lo + ((hi - lo) * i) / (ms.length - 1)
+      out.push({ m, yr })
+    })
+  })
+  return out
 }
 
 export default function App() {
@@ -40,17 +65,21 @@ export default function App() {
 
   return (
     <div className="app">
-      <header className="hero">
-        <div className="hero-inner">
-          <div className="badge">Rotordynamics Hub</div>
-          <h1>回転機械 ローターダイナミクス技術ロードマップ</h1>
-          <p className="lead">{KNOWLEDGE_NOTE}</p>
-          <div className="logic">
-            <span>社会動向</span><i>→</i><span>回転機械への需要シフト</span><i>→</i>
-            <span>RD課題</span><i>→</i><span>要素技術・手法・規格</span>
-          </div>
+      <header className="masthead">
+        <p className="kicker">Rotordynamics&nbsp;Hub · Technology&nbsp;Roadmap</p>
+        <h1>回転機械の<br />ローターダイナミクス</h1>
+        <p className="dek">
+          社会動向から回転機械への需要シフトを読み、そこに生じるローターダイナミクスの課題と、
+          それに応える要素技術の整備時期を一枚に俯瞰する。近中期（〜2035）を確度の高い実線、
+          長期（2035〜）を点線で示す。
+        </p>
+        <div className="logic">
+          <span>社会動向</span><i>→</i><span>需要シフト</span><i>→</i>
+          <span>RD課題</span><i>→</i><span>要素技術</span>
         </div>
       </header>
+
+      <div className="rule-double" />
 
       <nav className="tabs">
         {([
@@ -87,23 +116,18 @@ export default function App() {
         {tab === 'sources' && <SourcesView />}
       </main>
 
-      {active && (
-        <Drawer data={active} onClose={() => setActive(null)} />
-      )}
+      {active && <Drawer data={active} onClose={() => setActive(null)} />}
 
       <footer className="foot">
-        <span>確度: </span>
-        <span className="conf conf-est">確立</span> 一次裏取り済 ·{' '}
-        <span className="conf conf-prob">推定</span> 方向は妥当・値未確定 ·{' '}
-        <span className="conf conf-hyp">仮説</span> 長期シナリオ
-        <span className="foot-sep">|</span>
-        実線=〜2035 / 点線=2035〜（長期）
+        <sup>†</sup> 確度: <span className="conf c-e">確立</span> 一次裏取り済 ·{' '}
+        <span className="conf c-p">推定</span> 方向は妥当・値未確定 ·{' '}
+        <span className="conf c-h">仮説</span> 長期シナリオ。 実線=〜2035 ／ 点線=2035〜。
       </footer>
     </div>
   )
 }
 
-/* ───────────────────────── タイムライン（スイムレーン） ───────────────────────── */
+/* ───────────────────────── ロードマップ（連続時間軸） ───────────────────────── */
 function TimelineView({
   rdFilter,
   setRdFilter,
@@ -114,9 +138,23 @@ function TimelineView({
   onPick: (m: Milestone, d: Driver) => void
 }) {
   return (
-    <div className="timeline">
+    <div className="tl">
+      <div className="tl-masth">
+        <div>
+          <div className="figtag">Fig. 1 — 5 Drivers × Continuous Timeline</div>
+          <p className="section-note">
+            横軸は実時間。各ドライバの帯に並ぶ点が技術マイルストーン。点をたどると「いつ・何を」確立
+            すべきかが分かる。<span className="ob">塗り＝確立</span>、白抜き＝推定、破線＝仮説。
+          </p>
+        </div>
+        <aside className="margin">
+          <b>図の読み方。</b>下の課題タグで絞り込むと、その横断RD課題に関わる点だけが残る。点をタップ
+          すると詳細・関連ナレッジ・出典が開く。
+        </aside>
+      </div>
+
       <div className="filterbar">
-        <span className="filter-label">RD課題で絞り込み:</span>
+        <span className="filter-label">RD課題で絞り込み</span>
         <button className={rdFilter === null ? 'chip-f on' : 'chip-f'} onClick={() => setRdFilter(null)}>
           すべて
         </button>
@@ -124,7 +162,7 @@ function TimelineView({
           <button
             key={c.key}
             className={rdFilter === c.key ? 'chip-f on' : 'chip-f'}
-            style={rdFilter === c.key ? { background: RD_COLORS[c.key], borderColor: RD_COLORS[c.key] } : {}}
+            style={rdFilter === c.key ? { background: RD_COLORS[c.key], borderColor: RD_COLORS[c.key], color: '#fff' } : {}}
             onClick={() => setRdFilter(rdFilter === c.key ? null : c.key)}
           >
             {c.name}
@@ -132,46 +170,52 @@ function TimelineView({
         ))}
       </div>
 
-      <div className="grid">
-        <div className="grid-head">
-          <div className="lane-col">ドライバ</div>
-          {HORIZONS.map((h) => (
-            <div key={h} className={isDotted(h) ? 'h-col dotted' : 'h-col'}>
-              {h}
-              <small>{isDotted(h) ? '長期・シナリオ' : '近中期・実装寄り'}</small>
-            </div>
-          ))}
-        </div>
+      <div className="tl-scale">
+        {[['now 2026', 2026], ['2030', 2030], ['2035', 2035], ['2040+', 2040]].map(([t, y]) => (
+          <span key={t as string} className="tk" style={{ left: xp(y as number) + '%' }}>
+            {t as string}
+          </span>
+        ))}
+      </div>
 
+      <div className="tl-chart">
+        <div className="tl-brk" style={{ left: xp(BREAK) + '%' }}>
+          <span>2035</span>
+        </div>
         {DRIVERS.map((d) => (
-          <div className="lane" key={d.id}>
-            <div className="lane-col">
-              <span className="d-icon">{d.icon}</span>
-              <div>
-                <strong>{d.id} {d.name}</strong>
-                <small>{d.short}</small>
-              </div>
+          <div className="tl-lane" key={d.id}>
+            <div className="tl-head">
+              <span className="ic">{d.icon}</span>
+              <span className="ln">
+                {d.id} {d.name}
+              </span>
+              <small>{d.short}</small>
             </div>
-            {HORIZONS.map((h) => (
-              <div key={h} className={isDotted(h) ? 'cell dotted' : 'cell'} data-h={h}>
-                {d.milestones
-                  .filter((m) => m.horizon === h)
-                  .filter((m) => !rdFilter || m.rd.includes(rdFilter))
-                  .map((m) => (
-                    <button
-                      key={m.id}
-                      className="ms"
-                      onClick={() => onPick(m, d)}
-                      style={{ borderLeftColor: RD_COLORS[m.rd[0]] ?? '#94a3b8' }}
-                    >
-                      <span className={confClass(m.confidence)}>{m.confidence}</span>
-                      <span className="ms-title">{m.title}</span>
-                    </button>
-                  ))}
-              </div>
-            ))}
+            <div className="tl-track" style={{ '--bx': xp(BREAK) + '%' } as CSSProperties}>
+              {nodesOf(d).map(({ m, yr }) => {
+                const dim = rdFilter && !m.rd.includes(rdFilter)
+                return (
+                  <button
+                    key={m.id}
+                    className={'tl-node ' + confClass(m.confidence) + (dim ? ' dim' : '')}
+                    style={{ left: xp(yr) + '%' }}
+                    title={`${m.title}（${m.confidence}）`}
+                    onClick={() => onPick(m, d)}
+                  >
+                    <span className="mk" />
+                  </button>
+                )
+              })}
+            </div>
           </div>
         ))}
+      </div>
+
+      <div className="legend">
+        <span className="lg"><span className="di di-e" />確立</span>
+        <span className="lg"><span className="di di-p" />推定</span>
+        <span className="lg"><span className="di di-h" />仮説</span>
+        <span className="lg lg-line">── 〜2035 ／ ┄┄ 2035〜</span>
       </div>
     </div>
   )
@@ -181,16 +225,17 @@ function TimelineView({
 function DriversView({ onPick }: { onPick: (m: Milestone, d: Driver) => void }) {
   return (
     <div className="cards">
-      {DRIVERS.map((d) => (
+      {DRIVERS.map((d, i) => (
         <section className="card" key={d.id}>
-          <h2>
-            <span className="d-icon big">{d.icon}</span> {d.id} {d.name}
+          <h2 className="card-h">
+            <span className="lnum">{String(i + 1).padStart(2, '0')}</span>
+            <span className="d-icon">{d.icon}</span> {d.name}
             <small>{d.short}</small>
           </h2>
           <h3>社会・産業動向</h3>
           <ul className="trends">
-            {d.trends.map((t, i) => (
-              <li key={i}>
+            {d.trends.map((t, j) => (
+              <li key={j}>
                 <span className={confClass(t.confidence)}>{t.confidence}</span> {t.text}
                 {t.source && SOURCE_MAP[t.source] && (
                   <a className="src" href={SOURCE_MAP[t.source].url} target="_blank" rel="noreferrer">
@@ -205,7 +250,7 @@ function DriversView({ onPick }: { onPick: (m: Milestone, d: Driver) => void }) 
           <h3>マイルストーン</h3>
           <div className="ms-row">
             {d.milestones.map((m) => (
-              <button key={m.id} className="ms ms-inline" onClick={() => onPick(m, d)} style={{ borderLeftColor: RD_COLORS[m.rd[0]] ?? '#94a3b8' }}>
+              <button key={m.id} className="ms-inline" onClick={() => onPick(m, d)}>
                 <span className="hz">{m.horizon}</span>
                 <span className={confClass(m.confidence)}>{m.confidence}</span>
                 <span className="ms-title">{m.title}</span>
@@ -258,15 +303,15 @@ function RDMapView({ onJump }: { onJump: (key: string) => void }) {
   return (
     <div className="rdmap">
       <p className="section-note">
-        共通ベクトルが生む横断ローターダイナミクス課題。各カードの「タイムラインで見る」で、その課題を含む
-        マイルストーンだけを抽出表示します。色は既存ナレッジトピックに接地。
+        共通ベクトルが生む横断ローターダイナミクス課題。各カードの「タイムラインで見る」で、その課題を
+        含むマイルストーンだけを抽出表示する。色は既存ナレッジトピックに接地。
       </p>
       <div className="rd-grid">
         {RD_CLUSTERS.map((c) => (
           <div className="rd-card" key={c.key} style={{ borderTopColor: RD_COLORS[c.key] }}>
             <div className="rd-head">
               <strong>{c.name}</strong>
-              <span className="rd-count">{counts[c.key] ?? 0}件</span>
+              <span className="rd-count">{counts[c.key] ?? 0}</span>
             </div>
             <small className="rd-cause">主因: {c.cause}</small>
             <p>{c.detail}</p>
@@ -290,32 +335,28 @@ function RDMapView({ onJump }: { onJump: (key: string) => void }) {
 
 /* ───────────────────────── 出典 ───────────────────────── */
 function SourcesView() {
-  const primary = SOURCES_BY(true)
-  const secondary = SOURCES_BY(false)
+  const primary = SOURCES.filter((s) => s.primary)
+  const secondary = SOURCES.filter((s) => !s.primary)
   return (
     <div className="sources">
-      <h2>一次・確度高（[確立]の根拠）</h2>
-      <ul className="src-list">
+      <h2 className="sec-h">一次・確度高<small>（[確立] の根拠）</small></h2>
+      <ol className="src-list">
         {primary.map((s) => (
           <li key={s.key}>
-            <a href={s.url} target="_blank" rel="noreferrer">
-              {s.title}
-            </a>
+            <a href={s.url} target="_blank" rel="noreferrer">{s.title}</a>
             <code>{s.key}</code>
           </li>
         ))}
-      </ul>
-      <h2>二次・要裏取り（方向性のみ採用）</h2>
-      <ul className="src-list">
+      </ol>
+      <h2 className="sec-h">二次・要裏取り<small>（方向性のみ採用）</small></h2>
+      <ol className="src-list">
         {secondary.map((s) => (
           <li key={s.key}>
-            <a href={s.url} target="_blank" rel="noreferrer">
-              {s.title}
-            </a>
+            <a href={s.url} target="_blank" rel="noreferrer">{s.title}</a>
             <code>{s.key}</code>
           </li>
         ))}
-      </ul>
+      </ol>
       <p className="section-note">
         市場規模の絶対値は調査会社間で桁が割れるため方向性のみ採用。一次化タスクは知識ベースの
         open-questions に登録済み。
@@ -324,33 +365,26 @@ function SourcesView() {
   )
 }
 
-function SOURCES_BY(primary: boolean) {
-  return SOURCES.filter((s) => s.primary === primary)
-}
-
 /* ───────────────────────── 詳細ドロワー ───────────────────────── */
 function Drawer({ data, onClose }: { data: { m: Milestone; driver: Driver }; onClose: () => void }) {
   const { m, driver } = data
+  const horizonLabel = m.horizon === '2035〜' ? '2035〜 長期' : m.horizon
   return (
     <div className="drawer-wrap" onClick={onClose}>
       <aside className="drawer" onClick={(e) => e.stopPropagation()}>
-        <button className="x" onClick={onClose} aria-label="閉じる">
-          ×
-        </button>
+        <button className="x" onClick={onClose} aria-label="閉じる">×</button>
         <div className="dr-tags">
-          <span className="hz">{m.horizon}</span>
+          <span className="hz">{horizonLabel}</span>
           <span className={confClass(m.confidence)}>{m.confidence}</span>
-          <span className="pill">
-            {driver.icon} {driver.id} {driver.name}
-          </span>
+          <span className="pill">{driver.icon} {driver.id} {driver.name}</span>
         </div>
-        <h2>{m.title}</h2>
+        <h2 className="dr-h">{m.title}</h2>
         <p className="dr-detail">{m.detail}</p>
 
         <h4>横断RD課題</h4>
         <div className="dr-rd">
           {m.rd.map((k) => (
-            <span className="topic-pill" key={k} style={{ background: RD_MAP[k] ? RD_COLORS[k] : '#94a3b8', color: '#fff', borderColor: 'transparent' }}>
+            <span className="topic-pill solid" key={k} style={{ background: RD_COLORS[k], borderColor: RD_COLORS[k] }}>
               {RD_MAP[k]?.name ?? k}
             </span>
           ))}
@@ -378,9 +412,7 @@ function Drawer({ data, onClose }: { data: { m: Milestone; driver: Driver }; onC
                 const s = SOURCE_MAP[key]
                 return s ? (
                   <li key={key}>
-                    <a href={s.url} target="_blank" rel="noreferrer">
-                      {s.title}
-                    </a>
+                    <a href={s.url} target="_blank" rel="noreferrer">{s.title}</a>
                   </li>
                 ) : (
                   <li key={key}>{key}</li>
