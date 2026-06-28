@@ -32,6 +32,7 @@ export interface Vector {
   name: string
   detail: string
   drivers: string[] // 効くドライバ id
+  sources?: string[] // 横断テーマを裏付ける権威出典
 }
 
 export interface RDCluster {
@@ -70,7 +71,7 @@ export const DRIVERS: Driver[] = [
     milestones: [
       { id: 'D1-1', title: 'e-axle ギア連成NVH・高速軸受寿命設計', horizon: '〜2030', confidence: '確立', rd: ['bearing', 'torsional'], detail: '燃焼騒音が消えた結果ギアの伝達誤差(TE)・電磁騒音・軸受騒音が顕在化。時変メッシュ剛性×軸受非線形×電磁力が構造伝達経路で相互作用。14–20k rpm 軸受の寿命設計。', sources: ['SAE-MobilityEng-eAxle'] },
       { id: 'D1-2', title: 'HP/チラー用 磁気軸受遠心圧縮機の設計法確立', horizon: '〜2030', confidence: '確立', rd: ['bearing', 'stability'], detail: '無給油磁気軸受で省エネ30–50%。AMB制御ロバスト化と部分負荷運転点でのロータダイナミクス。', sources: ['IEA-FutureHeatPumps-2022'] },
-      { id: 'D1-3', title: 'モータ一体ロータの電磁連成解析の標準化', horizon: '〜2035', confidence: '確立', rd: ['emag'], detail: '不平衡磁気吸引力(UMP)が負の半径方向剛性として危険速度を低下、静偏心で0次および2×電源周波数成分を加振。複素固有値・不釣合い応答に織り込む。', sources: ['IEEE-UMP-9270865'], topics: ['separation-margin'] },
+      { id: 'D1-3', title: 'モータ一体ロータの電磁連成解析の標準化', horizon: '〜2035', confidence: '確立', rd: ['emag'], detail: '不平衡磁気吸引力(UMP)が負の半径方向剛性として危険速度を低下、静偏心で0次および2×電源周波数成分を加振。複素固有値・不釣合い応答に織り込む。', sources: ['IEEE-UMP-9270865', 'Holopainen-Sopanen-2005', 'HighSpeedPM-Machines-2022'], topics: ['separation-margin'] },
       { id: 'D1-4', title: 'インバータ駆動ねじり振動の評価定着', horizon: '〜2035', confidence: '確立', rd: ['torsional'], detail: 'VFD/PWM が電気周波数の基本波・6次・12次でねじり加振。第1ねじり固有値超えで連続反転トルク→破損例。固有値との分離余裕10%以上推奨。' },
       { id: 'D1-5', title: '軸受選定マップ（玉↔磁気↔ガス）整備', horizon: '〜2035', confidence: '推定', rd: ['bearing'], detail: '高速化で玉軸受は発熱・潤滑が限界。速度・出力密度・油フリー要件で磁気/ガス・フォイルへ移行する選定指針。' },
       { id: 'D1-6', title: 'e-axle 25–30k rpm 量産化の軸受移行閾値設計', horizon: '2035〜', confidence: '推定', rd: ['bearing'], detail: '転がり軸受のDN値限界を超え、ハイブリッド/エア軸受への移行閾値（寿命・損失・コスト）を定量化。' },
@@ -89,7 +90,7 @@ export const DRIVERS: Driver[] = [
     demandShift: '水素遠心圧縮機（低分子量ゆえ多段・高周速・長スパン→インテグラルギア型が有力）、CO2/超臨界CO2圧縮機（高密度ゆえ6–10段・サブシンクロナス顕在化）、水素・アンモニアGT、膨張機。',
     milestones: [
       { id: 'D2-1', title: '水素遠心圧縮機の危険速度/SM設計（軸分割）', horizon: '〜2030', confidence: '確立', rd: ['critspeed', 'seal'], detail: '水素は分子量極小・音速高く段あたり圧力上昇が小さい→多段・長スパン化で危険速度が低下。インテグラルギアで軸を分割し各軸短スパン化。', sources: ['IEA-GHR-2025'], topics: ['separation-margin', 'clearance-excitation-thomas-alford'] },
-      { id: 'D2-2', title: 'CO2圧縮機(CCUS,6–10段)の超臨界共振回避＋安定性基準', horizon: '〜2035', confidence: '確立', rd: ['stability', 'seal'], detail: '高密度ゆえインペラ固有振動数が低下→共振リスク増、段あたりヘッド制限で6–10段、サブシンクロナス増大。スワールブレーキ／ダンパシールで対策。', sources: ['GPPS-CO2IGC', 'ASME-SwirlBrake-2023'], topics: ['clearance-excitation-thomas-alford', 'rotor-stator-rub'] },
+      { id: 'D2-2', title: 'CO2圧縮機(CCUS,6–10段)の超臨界共振回避＋安定性基準', horizon: '〜2035', confidence: '確立', rd: ['stability', 'seal'], detail: '高密度ゆえインペラ固有振動数が低下→共振リスク増、段あたりヘッド制限で6–10段、サブシンクロナス増大。スワールブレーキ／ダンパシールで対策。実測ベンチマーク: 吐出20 MPaG・8段でlog dec 1.24→ISFDで1.33。', sources: ['GPPS-CO2IGC', 'Baba-2020-GPPS', 'ASME-SwirlBrake-2023'], topics: ['clearance-excitation-thomas-alford', 'rotor-stator-rub'] },
       { id: 'D2-3', title: '水素ドライガスシール・低MW励振の動特性DB', horizon: '〜2035', confidence: '推定', rd: ['seal'], detail: '低分子量ガスでのシール起因クロスカップル係数の実測データベース化。水素経済向けドライガスシール再設計。', topics: ['clearance-excitation-thomas-alford'] },
       { id: 'D2-4', title: 'NH3・H2 100%GTの燃焼変更に伴う軸系影響評価', horizon: '〜2035', confidence: '確立', rd: ['torsional', 'critspeed'], detail: '燃料多様化に伴う横振動・ねじり振動への影響評価。', sources: ['GEV-IHI-NH3-2025'] },
       { id: 'D2-5', title: 'sCO2発電商用機の高密度ロータダイナミクス対応', horizon: '2035〜', confidence: '仮説', rd: ['stability', 'bearing'], detail: '5,000–10,000 psi 超でガス密度が水に近づく。ダンパシール単独で不足する領域への支持/ダンパ新方式。', sources: ['TAMU-sCO2-Tutorial'] },
@@ -113,6 +114,7 @@ export const DRIVERS: Driver[] = [
       { id: 'D3-3', title: 'DC電源用エアロデリバティブGT＋発電機の高速起動・系統追従', horizon: '〜2035', confidence: '確立', rd: ['torsional', 'stability'], detail: 'フリーパワータービン構成・急速起動・系統追従。ねじり振動・短絡トルク・SSR（subsynchronous resonance）対策、頻繁起動停止の疲労。', sources: ['Cleanview-BTM-2025'] },
       { id: 'D3-4', title: 'sCO2/ORC廃熱回収の実用化', horizon: '2035〜', confidence: '仮説', rd: ['stability', 'bearing'], detail: '臨界点近傍の実在気体効果下での圧縮機ロータダイナミクス・軸受/シール動特性。DCのGPU廃熱は低温でtrans-critical ORCが優位との比較も。' },
       { id: 'D3-5', title: 'センサレス自己診断AMBの標準化', horizon: '2035〜', confidence: '推定', rd: ['bearing', 'digital'], detail: 'AMB内蔵センサ・電流情報によるモデルベースのタッチダウン予知・自己診断。' },
+      { id: 'D3-7', title: 'AIデータセンター負荷急変→発電機ねじり疲労の評価', horizon: '〜2035', confidence: '確立', rd: ['torsional'], detail: 'AI学習サイクルで定格最大70%の電力急変が、同期発電機タービン軸のサブシンクロナス帯ねじり振動を励起。周波数偏差≤1.5 Hz制約とGoodman線図で疲労寿命を評価（preprint段階）。短絡過渡トルク・SSRも古典機構として連なる。', sources: ['AIDC-Torsional-2026', 'ASME-GT1996-ShortCircuitTorsion'] },
       { id: 'D3-6', title: '燃料電池台頭による発電機需要侵食シナリオの管理', horizon: '2035〜', confidence: '推定', rd: ['digital'], detail: 'SOFC（Bloom等）がDC主電源として急拡大すると回転機(GT/発電機)需要を一部代替。市場リスク項目。' },
     ],
   },
@@ -129,7 +131,7 @@ export const DRIVERS: Driver[] = [
     milestones: [
       { id: 'D4-1', title: 'FCエアコンプレッサ(10–15万rpm)のサブシンクロナス渦動抑制', horizon: '〜2030', confidence: '確立', rd: ['stability', 'bearing'], detail: 'ガス/エアフォイル軸受ロータは起動停止の大振幅・高速時のサブシンクロナス渦動（10–17krpmで渦動比1/2等）。マルチパッド・プリロード設計で抑制。', sources: ['Xu-IMechE-FoilRotor-2024'], topics: ['rotor-stator-rub'] },
       { id: 'D4-2', title: '高出力密度HSPMM(~15kW/kg)の曲げ危険速度・超臨界通過＋能動制御', horizon: '〜2035', confidence: '確立', rd: ['critspeed', 'emag'], detail: '出力密度を上げると軸が細くなり曲げ危険速度に到達→超臨界運転＋制限回転域・能動制御を要する。', sources: ['NASA-EAP-NTRS'] },
-      { id: 'D4-3', title: 'ガスフォイル軸受ロータのFSI＋伝達マトリクス検証フロー', horizon: '〜2035', confidence: '確立', rd: ['stability', 'bearing'], detail: 'Riccati伝達マトリクス法・流体構造連成(FSI)で安定性・固有振動数・Campbell線図・不釣合い応答を解析する設計検証フロー確立。', sources: ['Xu-IMechE-FoilRotor-2024'] },
+      { id: 'D4-3', title: 'ガスフォイル軸受ロータのFSI＋伝達マトリクス検証フロー', horizon: '〜2035', confidence: '確立', rd: ['stability', 'bearing'], detail: 'Riccati伝達マトリクス法・流体構造連成(FSI)で安定性・固有振動数・Campbell線図・不釣合い応答を解析する設計検証フロー確立。FCEV遠心では危険速度をGFBが支配（空力剛性は無視可）。', sources: ['Xu-IMechE-FoilRotor-2024', 'GFB-FCEV-CritSpeed-2023'] },
       { id: 'D4-4', title: '航空機動ジャイロ連成の危険速度マップ', horizon: '〜2035', confidence: '確立', rd: ['fwbw', 'critspeed'], detail: 'yaw/pitch/roll機動で回転体にジャイロモーメント→前進/後退モードの危険速度が分離。機体機動との相互作用を航空安全要件として織り込む。', topics: ['forward-backward-whirl'] },
       { id: 'D4-5', title: 'MW級ハイブリッド推進ターボジェネレータのRD・ねじり評価', horizon: '〜2035', confidence: '確立', rd: ['torsional', 'critspeed'], detail: 'GE/NASA系のMW級・多kVハイブリッド推進系のロータダイナミクス・ねじり振動評価。', sources: ['GE-NASA-Hybrid-2022'] },
       { id: 'D4-6', title: '舶用NH3/メタノール対応の高速ターボ機械', horizon: '〜2035', confidence: '推定', rd: ['critspeed'], detail: '2030年頃から急拡大する舶用脱炭素燃料に備えた高速ロータ設計対応。', sources: ['GMF-DNV-Fuels'] },
@@ -164,12 +166,34 @@ export const DRIVERS: Driver[] = [
 
 // ───────────────────────── 共通ベクトル（縦糸） ─────────────────────────
 export const VECTORS: Vector[] = [
-  { id: 'V1', name: '油フリー化', detail: '磁気軸受(AMB)・ガス/フォイル軸受への移行。潤滑油の汚染・損失・保守を排除。', drivers: ['D1', 'D3', 'D4'] },
-  { id: 'V2', name: '超高速・高出力密度化', detail: '軸細径化→曲げ危険速度に到達→超臨界(supercritical)運転が標準に。', drivers: ['D1', 'D4'] },
-  { id: 'V3', name: 'モータ一体化', detail: '高速PMモータ直結→電磁連成（UMP・偏心・2×電源周波数）、インバータ駆動ねじり。', drivers: ['D1', 'D3', 'D4'] },
-  { id: 'V4', name: '作動流体の極端化', detail: '低分子量(H2)＝多段・長スパン化／高密度(sCO2)＝サブシンクロナス・インペラ共振。', drivers: ['D2', 'D3'] },
-  { id: 'V5', name: 'デジタル化', detail: 'UQ/サロゲート/PINN/デジタルツイン、AI状態監視・予知保全。', drivers: ['D5'] },
+  { id: 'V1', name: '油フリー化', detail: '磁気軸受(AMB)・ガス/フォイル軸受への移行。潤滑油の汚染・損失・保守を排除し、安定性(サブシンクロナス)・タッチダウンが業界横断の共通課題になる。', drivers: ['D1', 'D3', 'D4'], sources: ['DellaCorte-2012-MSSP', 'ISO14839-5-2022', 'Khatri-Hawkins-ISMB16'] },
+  { id: 'V2', name: '超高速・高出力密度化', detail: '軸細径化→曲げ危険速度に到達→超臨界(supercritical)運転が標準に。内部減衰・回転慣性励振が不安定化要因として共通化。', drivers: ['D1', 'D4'], sources: ['NASA-EAP-2023', 'MDPI-AMB-Review-2025'] },
+  { id: 'V3', name: 'モータ一体化', detail: '高速PMモータ直結→電磁連成（UMP＝負の半径方向剛性で危険速度低下・2×電源周波数加振）、インバータ駆動ねじり。高速電気機械として横断化。', drivers: ['D1', 'D3', 'D4'], sources: ['Gerada-2014-IEEE-TIE', 'Holopainen-Sopanen-2005', 'HighSpeedPM-Machines-2022'] },
+  { id: 'V4', name: '作動流体の極端化', detail: '低分子量(H2)＝アエロ励振小だが多段・長スパンで危険速度律速／高密度(sCO2)＝旋回流クロスカップルでサブシンクロナス安定性律速。', drivers: ['D2', 'D3'], sources: ['Baba-2020-GPPS', 'TAMU-sCO2-Tutorial', 'SwRI-STEP-Rotordyn-2018'] },
+  { id: 'V5', name: 'デジタル化', detail: 'UQ/サロゲート/PINN/デジタルツイン、AI状態監視・予知保全が設計・運用を横断的に変える。', drivers: ['D5'], sources: ['Fu-MSSP-UQreview-2023', 'DT-Sensors-2024'] },
 ]
+
+// ───────────────────────── ストーリー（冒頭ナラティブ＋権威アンカー） ─────────────────────────
+// refs は出典キー（SOURCE_MAP にあればリンク）または既存ナレッジ topic slug。
+export const NARRATIVE: { text: string; refs: string[] }[] = [
+  { text: '世界は脱炭素・電化・AIという3つの不可逆な潮流に同時に晒され、エネルギーと航空の双方でネットゼロ2050が政策目標として確定した。', refs: ['ICAO-LTAG-2022', 'IEA-GHR-2024'] },
+  { text: 'その帰結として、回転機械への要求は「より高速・高出力密度・潤滑油フリー・極端な作動流体」へ一斉にシフトしている。', refs: ['NASA-EAP-2023', 'CleanHydrogenJU-SRIA-2022'] },
+  { text: '航空はMW級電動推進で電動機13 kW/kg級・2035年就航を狙い、軽量薄肉・超高速ロータが標準化する。', refs: ['NASA-EAP-2023', 'CleanAviation-SRIA-2024'] },
+  { text: 'エネルギー転換は水素・アンモニア・sCO2を主役に据え、低分子量ガスの多段長スパン圧縮機や、水の密度に迫る高密度sCO2ターボ機械を生む。', refs: ['CleanHydrogenJU-SRIA-2022', 'DOE-STEP-SwRI-2024'] },
+  { text: 'AIデータセンターは電力需要を2030年に倍増（415→945 TWh）させ、油フリー磁気軸受チラー圧縮機と液冷ポンプの需要を爆発させている。', refs: ['IEA-EnergyAI-2025', 'Uptime-GDCS-2025'] },
+  { text: 'これら機種を超えて、進化方向は油フリー化・超高速/高出力密度・モータ一体化・作動流体の極端化・デジタル化の5本に収束する。', refs: ['DellaCorte-2012-MSSP', 'MDPI-AMB-Review-2025'] },
+  { text: '結果としてロータダイナミクスには古典的難問が新条件で再来する——危険速度の超臨界通過と分離余裕、自励・サブシンクロナス安定性、シール/隙間の流体励起、電磁連成とねじり。', refs: ['separation-margin', 'clearance-excitation-thomas-alford', 'forward-backward-whirl'] },
+  { text: 'ターボ機械の権威も「開発後段で顕在化する問題は本質的に動的で、減衰の定量化と流体-構造連成こそ最難関」と総括しており、課題の核心は一致している。', refs: ['ASME-Spakovszky-2023'] },
+  { text: '解の方向は、磁気・ガス/フォイル軸受とダンパシール／スワールブレーキによる安定化、能動制御、そして不確かさ定量化(UQ)・デジタルツインでの確率論的設計に向かう。', refs: ['DellaCorte-NASA-2016', 'Fu-MSSP-UQreview-2023', 'DT-Sensors-2024'] },
+  { text: '規格（API 617/684, ISO 20816/14839/21940）はこの変化に追従改訂中だが、油フリー/ガス軸受機を正面から扱う規格は未整備で、ここを埋めることがロードマップ後半の到達点になる。', refs: ['ISO20816-1-2016', 'ISO14839-5-2022'] },
+]
+
+export const ANCHOR = {
+  quote:
+    '開発後段で顕在化する問題は本質的に動的（surge / flutter / rotordynamic）であり、最難関は減衰の定量化と流体-構造連成（FSI）の予測である。',
+  attribution: 'Z. S. Spakovszky, “Instabilities Everywhere! Hard Problems in Aero-Engines”, 2021 IGTI Scholar Lecture',
+  ref: 'ASME-Spakovszky-2023',
+}
 
 // ───────────────────────── 横断RD課題クラスタ ─────────────────────────
 export const RD_CLUSTERS: RDCluster[] = [
@@ -218,6 +242,36 @@ export const SOURCES: SourceRef[] = [
   { key: 'SAE-MobilityEng-eAxle', title: 'E-Axles Speed Electrification (SAE Mobility Engineering)', url: 'https://www.mobilityengineeringtech.com/component/content/article/43637-sae-ma-02948', primary: true },
   { key: 'MDPI-EVS-13-4-65', title: 'Multi-Criteria Analysis of Electric Motors for EVs (MDPI EVS)', url: 'https://www.mdpi.com/2032-6653/13/4/65', primary: true },
   { key: 'GMF-DNV-Fuels', title: 'Zero-emission shipping fuels: methanol and ammonia (GMF/DNV)', url: 'https://globalmaritimeforum.org/news/zero-emission-shipping-fuels-methanol-and-ammonia/', primary: true },
+  // ── 2026-06-28 深掘り（一次格上げ・RD因果・横断テーマ・俯瞰文献） ──
+  { key: 'IEA-GHR-2024', title: 'IEA — Global Hydrogen Review 2024（需要97Mt/低排出<1Mt, FID 20GW）', url: 'https://www.iea.org/reports/global-hydrogen-review-2024', primary: true },
+  { key: 'IEA-GEO-2025', title: 'IEA — Global EV Outlook 2025（2030 EV 40%・走行245M台）', url: 'https://www.iea.org/reports/global-ev-outlook-2025/executive-summary', primary: true },
+  { key: 'IEA-CCUS-2025', title: 'IEA — CCUS Projects Database 2025（CO2回収 50→430 Mt）', url: 'https://www.iea.org/data-and-statistics/data-product/ccus-projects-database', primary: true },
+  { key: 'ReFuelEU-2023', title: 'EU — ReFuelEU Aviation（SAF 6%/2030→70%/2050, e-fuel 1.2%→35%）', url: 'https://transport.ec.europa.eu/transport-modes/air/environment/refueleu-aviation_en', primary: true },
+  { key: 'IMO-2023-GHG', title: 'IMO — 2023 GHG Strategy（−20%/2030・−70%/2040・netzero 2050）', url: 'https://www.imo.org/en/ourwork/environment/pages/2023-imo-strategy-on-reduction-of-ghg-emissions-from-ships.aspx', primary: true },
+  { key: 'ICAO-LTAG-2022', title: 'ICAO — LTAG net-zero 2050（技術寄与~20%）', url: 'https://www.icao.int/environmental-protection/long-term-global-aspirational-goal-ltag-international-aviation', primary: true },
+  { key: 'NASA-EAP-2023', title: 'NASA — Electric Aircraft Propulsion（MW電動機 13.2 kW/kg@96%, EIS 2035–40）', url: 'https://ntrs.nasa.gov/citations/20230008891', primary: true },
+  { key: 'CleanAviation-SRIA-2024', title: 'Clean Aviation JU — SRIA 2024（正味CO2▲90% by 2035, HPA=水素GT/FC圧縮機）', url: 'https://clean-aviation.eu/sites/default/files/2024-09/2024-Clean-Aviation-SRIA.pdf', primary: true },
+  { key: 'CleanHydrogenJU-SRIA-2022', title: 'Clean Hydrogen JU — SRIA KPI（H2圧縮機 2.5→2 kWh/kg・寿命14→20yr, GT 0–100%H2）', url: 'https://www.clean-hydrogen.europa.eu/knowledge-management/strategy-map-and-key-performance-indicators/clean-hydrogen-ju-sria-key-performance-indicators-kpis_en', primary: true },
+  { key: 'HydrogenCouncil-Compass-2025', title: 'Hydrogen Council — Global Hydrogen Compass 2025（投資>$110bn, 2030生産9–14 Mtpa）', url: 'https://compass.hydrogencouncil.com/wp-content/uploads/2025/09/Hydrogen-Council-Global-Hydrogen-Compass-2025.pdf', primary: true },
+  { key: 'DOE-STEP-SwRI-2024', title: 'DOE/SwRI/GTI — STEP Demo 10 MWe sCO2（初発電 2024）', url: 'https://www.swri.org/newsroom/press-releases/step-demo-supercritical-co2-pilot-plant-generates-electricity-the-first-time', primary: true },
+  { key: 'SwRI-STEP-Rotordyn-2018', title: 'SwRI — 10 MWe sCO2 turbine rotordynamics（715°C/250bar/27krpm, ティルパッド＋SFD）', url: 'https://sco2symposium.com/papers2018/testing/076_Paper.pdf', primary: true },
+  { key: 'DellaCorte-2012-MSSP', title: 'DellaCorte — Oil-Free Shaft Support Rotordynamics: Past/Present/Future (MSSP 2012)', url: 'https://ntrs.nasa.gov/archive/nasa/casi.ntrs.nasa.gov/20110011144.pdf', primary: true },
+  { key: 'DellaCorte-NASA-2016', title: 'DellaCorte — Technical Development Path for Gas Foil Bearings (NASA 2016)', url: 'https://ntrs.nasa.gov/api/citations/20160013553/downloads/20160013553.pdf', primary: true },
+  { key: 'Gerada-2014-IEEE-TIE', title: 'Gerada et al. — High-Speed Electrical Machines: Technologies, Trends (IEEE TIE 2014)', url: 'https://eprints.nottingham.ac.uk/36293/', primary: true },
+  { key: 'Holopainen-Sopanen-2005', title: 'Holopainen et al. — Electromechanical interaction in rotordynamics (UMP, JSV 2005)', url: 'https://sarjaweb.vtt.fi/pdf/publications/2004/P543.pdf', primary: true },
+  { key: 'HighSpeedPM-Machines-2022', title: 'High-Speed PM Motors: A Review (Machines 2022, 10(7):549)', url: 'https://www.mdpi.com/2075-1702/10/7/549', primary: true },
+  { key: 'Baba-2020-GPPS', title: 'Baba et al. — High-pressure CO2 IGC（20 MPaG, log dec 1.24→1.33 ISFD）(GPPS 2020)', url: 'https://journal.gpps.global/Experimental-evaluation-of-performance-and-mechanical-reliability-for-high-pressure,124724,0,2.html', primary: true },
+  { key: 'AIDC-Torsional-2026', title: 'Hossain et al. — AI Data Centers & turbine-generator torsional fatigue (arXiv 2026, preprint)', url: 'https://arxiv.org/html/2605.01173v1', primary: true },
+  { key: 'ASME-GT1996-ShortCircuitTorsion', title: 'Transient Torsional Vibration under Short Circuit (ASME GT1996)', url: 'https://asmedigitalcollection.asme.org/GT/proceedings/GT1996/78743/V003T07A001/237643', primary: true },
+  { key: 'ISO20816-1-2016', title: 'ISO 20816-1:2016（ISO 10816+7919 を統合＝振動評価規格の収斂）', url: 'https://www.iso.org/standard/63180.html', primary: true },
+  { key: 'DT-Sensors-2024', title: 'A Review of Digital Twinning for Rotating Machinery (Sensors 2024, 24(15):5002)', url: 'https://www.mdpi.com/1424-8220/24/15/5002', primary: true },
+  { key: 'ASME-Spakovszky-2023', title: 'Spakovszky — Instabilities Everywhere! Hard Problems in Aero-Engines (ASME 2023 IGTI)', url: 'https://doi.org/10.1115/1.4055424', primary: true },
+  { key: 'MDPI-AMB-Review-2025', title: 'Review on R&D of Magnetic Bearings (Energies 2025, 18(12):3222)', url: 'https://www.mdpi.com/1996-1073/18/12/3222', primary: true },
+  { key: 'Cryo-Turboexpander-2023', title: 'Cryogenic turboexpander on gas foil bearings, 175k rpm (Sādhanā 2023)', url: 'https://link.springer.com/article/10.1007/s12046-023-02298-7', primary: true },
+  { key: 'GFB-FCEV-CritSpeed-2023', title: 'GFB/Labyrinth/Impeller impact on FCEV compressor critical speed (Lubricants 2023)', url: 'https://www.mdpi.com/2075-4442/11/12/532', primary: true },
+  { key: 'Uptime-GDCS-2025', title: 'Uptime Institute — Global Data Center Survey 2025（PUE 1.54, DLC 22%）', url: 'https://datacenter.uptimeinstitute.com/rs/711-RIA-145/images/2025.Annual.Survey.Report.pdf', primary: true },
+  { key: 'API-TR684-1-2019', title: 'API TR 684-1 — Rotordynamic Tutorial（横危険速度・安定性・ねじり・分離余裕）', url: 'https://standards.globalspec.com/std/14225369/api-tr-684-1', primary: true },
+  { key: 'Khatri-Hawkins-ISMB16', title: 'Khatri & Hawkins — API 617 vs ISO 14839-3 for AMB compressors (ISMB16)', url: 'https://www.magneticbearings.org/app/uploads/publications/ismb16/ismb16_008.pdf', primary: true },
   { key: 'TGM-AIEng-2026', title: 'AI in Engineering 2026: Simulation, Digital Twins & Surrogates (TGM)', url: 'https://www.tgm.solutions/en/top-technologies-in-engineering/ai-in-engineering-2026-how-simulation-digital-twins-surrogate-models-are-redefining-cae/', primary: false },
   { key: 'RnM-DCLiquid-2025', title: 'Data Center Liquid Cooling Market 2025-2030 (二次・要裏取り)', url: 'https://www.globenewswire.com/news-release/2025/06/26/3106063/28124/en/Data-Center-Liquid-Cooling-Market-Size-Share-Trends-Analysis-Report-with-Growth-Forecasts-2025-2030.html', primary: false },
 ]

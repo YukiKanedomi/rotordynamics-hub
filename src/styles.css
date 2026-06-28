@@ -202,6 +202,40 @@ sup { color: var(--accent); }
 .di-h { background: var(--paper); border: 1.5px dashed var(--accent-2); }
 .lg-line { font-family: var(--font-mono); font-size: 11px; }
 
+/* ───── story / narrative ───── */
+.narr { list-style: none; counter-reset: n; margin: 8px 0 0; padding: 0; }
+.narr li {
+  position: relative; counter-increment: n; padding: 12px 0 12px 36px; border-bottom: 1px solid var(--rule);
+}
+.narr li::before {
+  content: counter(n); position: absolute; left: 0; top: 11px;
+  font-family: var(--font-display); font-style: italic; font-size: 18px; color: var(--accent);
+}
+.narr-t { display: block; font-size: 14px; line-height: 1.85; color: var(--ink); }
+.cites { display: inline-flex; flex-wrap: wrap; gap: 5px; margin-top: 7px; }
+.cref {
+  font-family: var(--font-mono); font-size: 10px; color: var(--accent-2);
+  border: 1px solid var(--rule); background: var(--navy-soft); padding: 1px 6px; border-radius: 4px;
+  text-decoration: none; white-space: nowrap;
+}
+.cref:hover { border-color: var(--accent-2); }
+.cref.topic { background: var(--paper-sink); color: var(--ink-soft); }
+.anchor {
+  margin: 26px 0; padding: 18px 22px; border-left: 3px solid var(--accent);
+  background: var(--paper-sink); border-radius: 0 12px 12px 0;
+}
+.anchor p {
+  font-family: var(--font-display); font-style: italic; font-size: 18px; line-height: 1.6;
+  margin: 0 0 10px; color: var(--ink);
+}
+.anchor footer { font-size: 12px; color: var(--dim); display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.themes { display: flex; flex-direction: column; gap: 12px; margin-top: 8px; }
+.theme { display: flex; gap: 16px; background: var(--paper-raise); border: 1px solid var(--rule); border-radius: var(--radius-lg); padding: 16px 18px; }
+.theme .v-body strong { font-family: var(--font-display); font-weight: 600; font-size: 17px; }
+.theme .v-body p { margin: 5px 0 9px; font-size: 13.5px; line-height: 1.65; color: var(--ink-soft); }
+.theme-drivers { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 9px; }
+.theme-src { font-size: 11px; color: var(--dim); display: flex; flex-wrap: wrap; gap: 6px; align-items: baseline; }
+
 /* ───── driver cards ───── */
 .cards { display: flex; flex-direction: column; gap: 18px; }
 .card { background: var(--paper-raise); border: 1px solid var(--rule); border-radius: var(--radius-lg); padding: 22px 24px; }

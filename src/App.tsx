@@ -9,13 +9,15 @@ import {
   SOURCE_MAP,
   TOPIC_MAP,
   HORIZONS,
+  NARRATIVE,
+  ANCHOR,
   type Confidence,
   type Driver,
   type Horizon,
   type Milestone,
 } from './data/roadmap'
 
-type Tab = 'timeline' | 'drivers' | 'vectors' | 'rdmap' | 'sources'
+type Tab = 'story' | 'timeline' | 'drivers' | 'vectors' | 'rdmap' | 'sources'
 
 /* 確度 → クラス（small caps バッジ・ノード形状の両方で使用） */
 const confKey = (c: Confidence) => (c === '確立' ? 'e' : c === '推定' ? 'p' : 'h')
@@ -91,7 +93,7 @@ function useIsMobile() {
 
 export default function App() {
   const isMobile = useIsMobile()
-  const [tab, setTab] = useState<Tab>('timeline')
+  const [tab, setTab] = useState<Tab>('story')
   const [active, setActive] = useState<{ m: Milestone; driver: Driver } | null>(null)
   const [rdFilter, setRdFilter] = useState<string | null>(null)
 
@@ -115,6 +117,7 @@ export default function App() {
 
       <nav className="tabs">
         {([
+          ['story', 'ストーリー'],
           ['timeline', 'ロードマップ'],
           ['drivers', '5ドライバ'],
           ['vectors', '共通ベクトル'],
@@ -128,6 +131,7 @@ export default function App() {
       </nav>
 
       <main className="main">
+        {tab === 'story' && <StoryView />}
         {tab === 'timeline' &&
           (isMobile ? (
             <TimelineMobile
@@ -280,6 +284,82 @@ function TimelineView({
         <span className="lg"><span className="di di-p" />推定</span>
         <span className="lg"><span className="di di-h" />仮説</span>
         <span className="lg lg-line">── 〜2035 ／ ┄┄ 2035〜</span>
+      </div>
+    </div>
+  )
+}
+
+/* ───────────────────────── ストーリー（ナラティブ＋アンカー＋つながり） ───────────────────────── */
+function Cite({ refs }: { refs: string[] }) {
+  return (
+    <span className="cites">
+      {refs.map((r) => {
+        const s = SOURCE_MAP[r]
+        if (s)
+          return (
+            <a key={r} className="cref" href={s.url} target="_blank" rel="noreferrer" title={s.title}>
+              {r}
+            </a>
+          )
+        const t = TOPIC_MAP[r]
+        return (
+          <span key={r} className="cref topic" title={t?.summary}>
+            {t ? t.name : r}
+          </span>
+        )
+      })}
+    </span>
+  )
+}
+
+function StoryView() {
+  return (
+    <div className="story">
+      <div className="figtag">Narrative — なぜこのロードマップになるのか</div>
+      <p className="section-note">
+        大きな社会動向から、回転機械の共通変化、ローターダイナミクスの古典難問の再来、解の方向まで。
+        各文を一次・権威出典（IEA / NASA / 規格 / 査読）に紐づけ、根拠を辿れるようにした。
+      </p>
+      <ol className="narr">
+        {NARRATIVE.map((n, i) => (
+          <li key={i}>
+            <span className="narr-t">{n.text}</span>
+            <Cite refs={n.refs} />
+          </li>
+        ))}
+      </ol>
+
+      <blockquote className="anchor">
+        <p>“{ANCHOR.quote}”</p>
+        <footer>
+          — {ANCHOR.attribution} <Cite refs={[ANCHOR.ref]} />
+        </footer>
+      </blockquote>
+
+      <h2 className="sec-h">つながり — 機種を超えて再帰する5つの共通ベクトル</h2>
+      <p className="section-note">
+        別々のドライバが同じローターダイナミクス課題に収束することを、横断的な総説・規格が裏付ける。
+      </p>
+      <div className="themes">
+        {VECTORS.map((v) => (
+          <div className="theme" key={v.id}>
+            <div className="v-id">{v.id}</div>
+            <div className="v-body">
+              <strong>{v.name}</strong>
+              <p>{v.detail}</p>
+              <div className="theme-drivers">
+                {v.drivers.map((id) => (
+                  <span className="pill" key={id}>{id}</span>
+                ))}
+              </div>
+              {v.sources && (
+                <div className="theme-src">
+                  裏付け: <Cite refs={v.sources} />
+                </div>
+              )}
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   )
