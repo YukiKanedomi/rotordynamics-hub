@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState, type CSSProperties } from 'react'
 import { DriverIcon } from './icons'
+import BackwardSection from './BackwardSection'
 import {
   DRIVERS,
   VECTORS,
@@ -92,14 +93,54 @@ function useIsMobile() {
   return m
 }
 
+type Section = 'roadmap' | 'bw'
+
 export default function App() {
+  const [section, setSection] = useState<Section>(() =>
+    typeof location !== 'undefined' && location.hash.includes('bw') ? 'bw' : 'roadmap',
+  )
+  return (
+    <div className="app">
+      <div className="hubbar">
+        <span className="hub-brand">
+          Rotordynamics<span className="hub-dot">·</span>Hub
+        </span>
+        <nav className="hub-nav">
+          {([
+            ['roadmap', '技術ロードマップ'],
+            ['bw', 'バックワード励振の整理'],
+          ] as [Section, string][]).map(([k, label]) => (
+            <button
+              key={k}
+              className={section === k ? 'hub-link on' : 'hub-link'}
+              onClick={() => setSection(k)}
+            >
+              {label}
+            </button>
+          ))}
+        </nav>
+      </div>
+
+      {section === 'roadmap' ? <RoadmapSection /> : <BackwardSection />}
+
+      <footer className="foot">
+        <sup>†</sup> 確度: <span className="conf c-e">確立</span> 一次裏取り済 ·{' '}
+        <span className="conf c-p">推定</span> 方向は妥当・値未確定 ·{' '}
+        <span className="conf c-h">仮説</span> 長期シナリオ／未検証。
+        {section === 'roadmap' && <> 実線=〜2035 ／ 点線=2035〜。</>}
+      </footer>
+    </div>
+  )
+}
+
+function RoadmapSection() {
   const isMobile = useIsMobile()
   const [tab, setTab] = useState<Tab>('story')
   const [active, setActive] = useState<{ m: Milestone; driver: Driver } | null>(null)
   const [rdFilter, setRdFilter] = useState<string | null>(null)
 
   return (
-    <div className="app">
+    <>
       <header className="masthead">
         <p className="kicker">Rotordynamics&nbsp;Hub · Technology&nbsp;Roadmap</p>
         <h1>回転機械の<br />ローターダイナミクス</h1>
@@ -163,13 +204,7 @@ export default function App() {
       </main>
 
       {active && <Drawer data={active} onClose={() => setActive(null)} />}
-
-      <footer className="foot">
-        <sup>†</sup> 確度: <span className="conf c-e">確立</span> 一次裏取り済 ·{' '}
-        <span className="conf c-p">推定</span> 方向は妥当・値未確定 ·{' '}
-        <span className="conf c-h">仮説</span> 長期シナリオ。 実線=〜2035 ／ 点線=2035〜。
-      </footer>
-    </div>
+    </>
   )
 }
 
