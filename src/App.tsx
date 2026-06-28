@@ -369,8 +369,22 @@ function StoryView() {
 }
 
 /* ───────────────────────── つながり図（4層リンク図） ───────────────────────── */
+// 物語連動ツアー: 各ステップがナラティブの一節＋出典。anchor=そのドライバの因果連鎖を点灯 /
+// layers=指定レイヤを点灯（層内の流れを見せる）。
+const TOUR: { text: string; refs: string[]; anchor?: string; layers?: string[] }[] = [
+  { text: '脱炭素・電化・AIという3つの不可逆な潮流が、回転機械の全分野に同時に効きはじめた。まず社会動向（L1）が起点になる。', refs: ['ICAO-LTAG-2022', 'IEA-GHR-2024'], layers: ['L1'] },
+  { text: 'その結果、機種を超えて進化方向は5本の共通ベクトル—油フリー・超高速・モータ一体・極端流体・デジタル—へ収束する（L1→L2）。', refs: ['DellaCorte-2012-MSSP', 'Gerada-2014-IEEE-TIE'], layers: ['L1', 'L2'] },
+  { text: '航空（D4）の筋：MW級電動推進が軽量薄肉・超高速ロータを生み、油フリー軸受とジャイロ・危険速度設計を要求する。', refs: ['NASA-EAP-2023', 'CleanAviation-SRIA-2024'], anchor: 'D4' },
+  { text: 'エネルギー転換（D2）の筋：低分子量H2と高密度sCO2という極端な作動流体が、危険速度律速とサブシンクロナス安定性を呼ぶ。', refs: ['CleanHydrogenJU-SRIA-2022', 'DOE-STEP-SwRI-2024'], anchor: 'D2' },
+  { text: 'データセンター（D3）の筋：電力倍増が油フリー磁気軸受チラーと系統追従発電を要求し、ねじり・安定性が前面に出る。', refs: ['IEA-EnergyAI-2025', 'AIDC-Torsional-2026'], anchor: 'D3' },
+  { text: 'こうして古典的なローターダイナミクス難問（L3）が、新しい条件で一斉に再来する。', refs: ['ASME-Spakovszky-2023'], layers: ['L3'] },
+  { text: '課題の核心は「減衰の定量化と流体-構造連成」。解（L4）は先進軸受・ダンパシール・能動制御・UQ/DT・規格整備へ向かう（L3→L4）。', refs: ['ASME-Spakovszky-2023', 'MDPI-AMB-Review-2025', 'Fu-MSSP-UQreview-2023'], layers: ['L3', 'L4'] },
+  { text: '一本の筋を端から端まで通すと：エネルギー転換 → 作動流体の極端化 → 安定性 → ダンパシール／先進軸受、と辿れる。', refs: ['Baba-2020-GPPS', 'ASME-SwirlBrake-2023'], anchor: 'D2' },
+]
+
 function LinkageView({ isMobile }: { isMobile: boolean }) {
   const [sel, setSel] = useState<string | null>(null)
+  const [tour, setTour] = useState<number | null>(null)
 
   const { LAYERS, edges, fAdj, bAdj, detailMap } = useMemo(() => {
     const LAYERS = [
@@ -397,26 +411,43 @@ function LinkageView({ isMobile }: { isMobile: boolean }) {
     return { LAYERS, edges, fAdj, bAdj, detailMap }
   }, [])
 
-  const chain = useMemo(() => {
-    if (!sel) return null
-    const nodes = new Set<string>([sel])
+  const chainOf = (start: string) => {
+    const nodes = new Set<string>([start])
     const es = new Set<string>()
-    let fr = [sel]
+    let fr = [start]
     while (fr.length) {
       const nx: string[] = []
       fr.forEach((id) => (fAdj[id] || []).forEach((b) => { es.add(id + '__' + b); if (!nodes.has(b)) { nodes.add(b); nx.push(b) } }))
       fr = nx
     }
-    fr = [sel]
+    fr = [start]
     while (fr.length) {
       const nx: string[] = []
       fr.forEach((id) => (bAdj[id] || []).forEach((a) => { es.add(a + '__' + id); if (!nodes.has(a)) { nodes.add(a); nx.push(a) } }))
       fr = nx
     }
     return { nodes, es }
-  }, [sel, fAdj, bAdj])
+  }
 
-  const cls = (id: string) => (sel ? (chain && chain.nodes.has(id) ? ' inchain' : ' dim') : '')
+  const focus = useMemo(() => {
+    if (tour !== null) {
+      const step = TOUR[tour]
+      if (step.anchor) return chainOf(step.anchor)
+      if (step.layers) {
+        const nodes = new Set<string>()
+        LAYERS.filter((L) => step.layers!.includes(L.key)).forEach((L) => L.nodes.forEach((n) => nodes.add(n.id)))
+        const es = new Set<string>()
+        edges.forEach(([a, b]) => { if (nodes.has(a) && nodes.has(b)) es.add(a + '__' + b) })
+        return { nodes, es }
+      }
+      return null
+    }
+    return sel ? chainOf(sel) : null
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tour, sel, LAYERS, edges, fAdj, bAdj])
+
+  const cls = (id: string) => (focus ? (focus.nodes.has(id) ? ' inchain' : ' dim') : '')
+  const pick = (id: string) => { setTour(null); setSel(sel === id ? null : id) }
 
   const posMap = useMemo(() => {
     const COLX = [60, 300, 545, 805], COLW = [150, 160, 195, 180], TOP = 46, H = 580, BOT = 22
@@ -431,7 +462,8 @@ function LinkageView({ isMobile }: { isMobile: boolean }) {
     return m
   }, [LAYERS])
 
-  const cap = sel ? detailMap[sel] : null
+  const cap = tour !== null ? null : sel ? detailMap[sel] : null
+  const step = tour !== null ? TOUR[tour] : null
 
   return (
     <div className="lk">
@@ -440,6 +472,19 @@ function LinkageView({ isMobile }: { isMobile: boolean }) {
         Phaal/Cambridge式の多層リンク図。ノードを{isMobile ? 'タップ' : 'クリック'}すると、上流（社会動向）から
         下流（解）までの<span className="ob">因果の連鎖</span>がハイライトされる。リンクこそが地図の本体。
       </p>
+
+      <div className="lk-tour">
+        {tour === null ? (
+          <button className="lk-tbtn" onClick={() => { setSel(null); setTour(0) }}>▶ ストーリーツアーを開始</button>
+        ) : (
+          <div className="lk-tnav">
+            <button className="lk-tstep" disabled={tour === 0} onClick={() => setTour(Math.max(0, tour - 1))}>◀ 前へ</button>
+            <span className="lk-tcount">STEP {tour + 1} / {TOUR.length}</span>
+            <button className="lk-tstep" disabled={tour === TOUR.length - 1} onClick={() => setTour(Math.min(TOUR.length - 1, tour + 1))}>次へ ▶</button>
+            <button className="lk-tend" onClick={() => setTour(null)}>終了</button>
+          </div>
+        )}
+      </div>
 
       {!isMobile ? (
         <div className="lk-figure">
@@ -453,8 +498,8 @@ function LinkageView({ isMobile }: { isMobile: boolean }) {
               const pa = posMap[a], pb = posMap[b]
               if (!pa || !pb) return null
               const x1 = pa.xRight, y1 = pa.cy, x2 = pb.xLeft, y2 = pb.cy, mx = (x1 + x2) / 2
-              const on = chain ? chain.es.has(a + '__' + b) : false
-              const off = chain ? !on : false
+              const on = focus ? focus.es.has(a + '__' + b) : false
+              const off = focus ? !on : false
               return <path key={i} d={`M${x1},${y1} C${mx},${y1} ${mx},${y2} ${x2},${y2}`} className={'lk-link' + (on ? ' on' : '') + (off ? ' off' : '')} />
             })}
             {LAYERS.map((L, li) =>
@@ -464,7 +509,7 @@ function LinkageView({ isMobile }: { isMobile: boolean }) {
                   <foreignObject key={n.id} x={p.x} y={p.cy - 26} width={p.w} height={52}>
                     <button
                       className={'lk-node l' + (li + 1) + (sel === n.id ? ' sel' : '') + cls(n.id)}
-                      onClick={(e) => { e.stopPropagation(); setSel(sel === n.id ? null : n.id) }}
+                      onClick={(e) => { e.stopPropagation(); pick(n.id) }}
                     >
                       {n.head && <span className="lk-head">{n.head}</span>}
                       <span className="lk-label">{n.label}</span>
@@ -485,7 +530,7 @@ function LinkageView({ isMobile }: { isMobile: boolean }) {
                   <button
                     key={n.id}
                     className={'lk-chip l' + (li + 1) + (sel === n.id ? ' sel' : '') + cls(n.id)}
-                    onClick={() => setSel(sel === n.id ? null : n.id)}
+                    onClick={() => pick(n.id)}
                   >
                     {n.head && <b>{n.head}</b>} {n.label}
                   </button>
@@ -497,8 +542,16 @@ function LinkageView({ isMobile }: { isMobile: boolean }) {
         </div>
       )}
 
-      <div className={'lk-cap' + (cap ? ' on' : '')}>
-        {cap ? (
+      <div className={'lk-cap' + (cap || step ? ' on' : '')}>
+        {step ? (
+          <>
+            <span className="lk-cap-step">STORY {tour! + 1}/{TOUR.length}</span>
+            <span className="lk-cap-d tour">{step.text}</span>
+            {step.refs.length > 0 && (
+              <span className="lk-cap-s">裏付け: <Cite refs={step.refs} /></span>
+            )}
+          </>
+        ) : cap ? (
           <>
             <strong>{cap.title}</strong>
             <span className="lk-cap-d">{cap.detail}</span>
@@ -507,7 +560,7 @@ function LinkageView({ isMobile }: { isMobile: boolean }) {
             )}
           </>
         ) : (
-          <span className="hint2">ノードを選ぶと、その社会動向→機械→課題→解の連鎖が浮かび上がります。</span>
+          <span className="hint2">ノードを選ぶと連鎖が浮かび、「ストーリーツアー」で順に辿れます。</span>
         )}
       </div>
     </div>

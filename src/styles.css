@@ -287,6 +287,27 @@ sup { color: var(--accent); }
 .lk-chip.dim { opacity: .25; }
 .lk-down { color: var(--accent); font-size: 18px; line-height: 1; margin: 4px 0; }
 
+/* tour controls */
+.lk-tour { margin: 14px 0; }
+.lk-tbtn {
+  font-family: var(--font-display); font-size: 14px; color: var(--paper); background: var(--accent);
+  border: 1px solid var(--accent); border-radius: 999px; padding: 8px 18px; cursor: pointer; transition: .12s;
+}
+.lk-tbtn:hover { filter: brightness(1.08); }
+.lk-tnav { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.lk-tstep {
+  font-family: var(--font-jp); font-size: 13px; color: var(--ink); background: var(--paper-raise);
+  border: 1px solid var(--rule); border-radius: 999px; padding: 7px 14px; cursor: pointer;
+}
+.lk-tstep:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+.lk-tstep:disabled { opacity: .4; cursor: default; }
+.lk-tcount { font-family: var(--font-mono); font-size: 12px; color: var(--accent); letter-spacing: .04em; padding: 0 4px; }
+.lk-tend {
+  font-family: var(--font-mono); font-size: 11px; color: var(--dim); background: none;
+  border: 1px solid var(--rule); border-radius: 999px; padding: 6px 12px; cursor: pointer; margin-left: auto;
+}
+.lk-tend:hover { color: var(--accent); border-color: var(--accent); }
+
 /* caption */
 .lk-cap {
   margin-top: 14px; padding: 13px 16px; border: 1px solid var(--rule); border-radius: var(--radius);
@@ -295,6 +316,8 @@ sup { color: var(--accent); }
 .lk-cap.on { border-left: 3px solid var(--accent); }
 .lk-cap strong { font-family: var(--font-display); font-weight: 600; font-size: 15px; display: block; margin-bottom: 3px; }
 .lk-cap-d { display: block; color: var(--ink-soft); }
+.lk-cap-d.tour { font-family: var(--font-display); font-size: 15px; line-height: 1.7; color: var(--ink); }
+.lk-cap-step { font-family: var(--font-mono); font-size: 10.5px; letter-spacing: .06em; color: var(--accent); display: block; margin-bottom: 5px; }
 .lk-cap-s { display: flex; flex-wrap: wrap; gap: 6px; align-items: baseline; margin-top: 7px; font-size: 11px; color: var(--dim); }
 .lk-cap .hint2 { color: var(--dim); font-style: italic; }
 
