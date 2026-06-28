@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState, type CSSProperties } from 'react'
+import { DriverIcon } from './icons'
 import {
   DRIVERS,
   VECTORS,
@@ -231,6 +232,7 @@ function TimelineView({
               return (
                 <div className="tl-lane" key={d.id}>
                   <div className="tl-head">
+                    <DriverIcon id={d.id} className="d-svg" />
                     <span className="lid">{d.id}</span>
                     <span className="ln">{d.name}</span>
                     <small>{d.short}</small>
@@ -345,7 +347,10 @@ function TimelineMobile({
                     onClick={() => onPick(m, d)}
                   >
                     <span className="vt-row">
-                      <span className="vt-driver"><b>{d.id}</b> {d.name}</span>
+                      <span className="vt-driver">
+                        <DriverIcon id={d.id} className="d-svg sm" />
+                        <b>{d.id}</b> {d.name}
+                      </span>
                       <span className={confClass(m.confidence)}>{m.confidence}</span>
                     </span>
                     <span className="vt-title">{m.title}</span>
@@ -375,6 +380,7 @@ function DriversView({ onPick }: { onPick: (m: Milestone, d: Driver) => void }) 
         <section className="card" key={d.id}>
           <h2 className="card-h">
             <span className="lnum">{String(i + 1).padStart(2, '0')}</span>
+            <DriverIcon id={d.id} className="d-svg big" />
             {d.name}
             <small>{d.short}</small>
           </h2>
@@ -522,7 +528,7 @@ function Drawer({ data, onClose }: { data: { m: Milestone; driver: Driver }; onC
         <div className="dr-tags">
           <span className="hz">{horizonLabel}</span>
           <span className={confClass(m.confidence)}>{m.confidence}</span>
-          <span className="pill">{driver.id} {driver.name}</span>
+          <span className="pill"><DriverIcon id={driver.id} className="d-svg sm" /> {driver.id} {driver.name}</span>
         </div>
         <h2 className="dr-h">{m.title}</h2>
         <p className="dr-detail">{m.detail}</p>
