@@ -58,6 +58,23 @@ function nodesOf(d: Driver): { m: Milestone; yr: number }[] {
   return out
 }
 
+/* 段違い配置: x が近いノードを別の行へ逃がし、重なりを避ける */
+function rowOffset(row: number) {
+  if (row === 0) return 0
+  const step = Math.ceil(row / 2) * 18
+  return row % 2 === 1 ? -step : step
+}
+function packRows<T extends { x: number }>(nodes: T[]): (T & { row: number })[] {
+  const MINGAP = 7 // 横方向の最小間隔（%）。これ未満で近接する点は上下へ段違い配置
+  const lastX: number[] = []
+  return nodes.map((n) => {
+    let r = 0
+    while (lastX[r] !== undefined && n.x - lastX[r] < MINGAP) r++
+    lastX[r] = n.x
+    return { ...n, row: r }
+  })
+}
+
 export default function App() {
   const [tab, setTab] = useState<Tab>('timeline')
   const [active, setActive] = useState<{ m: Milestone; driver: Driver } | null>(null)
@@ -170,46 +187,72 @@ function TimelineView({
         ))}
       </div>
 
-      <div className="tl-scale">
-        {[['now 2026', 2026], ['2030', 2030], ['2035', 2035], ['2040+', 2040]].map(([t, y]) => (
-          <span key={t as string} className="tk" style={{ left: xp(y as number) + '%' }}>
-            {t as string}
-          </span>
-        ))}
+      <div className="tl-scroll">
+        <div className="tl-inner">
+          <div className="tl-scale">
+            {[['now 2026', 2026], ['2030', 2030], ['2035', 2035], ['2040+', 2040]].map(([t, y]) => (
+              <span key={t as string} className="tk" style={{ left: xp(y as number) + '%' }}>
+                {t as string}
+              </span>
+            ))}
+          </div>
+
+          <div className="tl-chart">
+            <div className="tl-brk" style={{ left: xp(BREAK) + '%' }}>
+              <span>2035</span>
+            </div>
+            {DRIVERS.map((d) => {
+              const packed = packRows(
+                nodesOf(d)
+                  .map((n) => ({ ...n, x: xp(n.yr) }))
+                  .sort((a, b) => a.x - b.x),
+              )
+              return (
+                <div className="tl-lane" key={d.id}>
+                  <div className="tl-head">
+                    <span className="ic">{d.icon}</span>
+                    <span className="ln">
+                      {d.id} {d.name}
+                    </span>
+                    <small>{d.short}</small>
+                  </div>
+                  <div className="tl-track" style={{ '--bx': xp(BREAK) + '%' } as CSSProperties}>
+                    {packed.map(({ m, x, row }) => {
+                      const off = rowOffset(row)
+                      const dim = rdFilter && !m.rd.includes(rdFilter)
+                      return (
+                        <button
+                          key={m.id}
+                          className={'tl-node ' + confClass(m.confidence) + (dim ? ' dim' : '')}
+                          style={{ left: x + '%', top: off + 'px' }}
+                          onClick={() => onPick(m, d)}
+                        >
+                          {off !== 0 && (
+                            <span
+                              className={'stem ' + (off < 0 ? 'down' : 'up')}
+                              style={{ height: Math.abs(off) + 'px' }}
+                            />
+                          )}
+                          <span className="mk" />
+                          <span className="tip">
+                            {m.title}
+                            <i className={confClass(m.confidence)}>{m.confidence}</i>
+                          </span>
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
       </div>
 
-      <div className="tl-chart">
-        <div className="tl-brk" style={{ left: xp(BREAK) + '%' }}>
-          <span>2035</span>
-        </div>
-        {DRIVERS.map((d) => (
-          <div className="tl-lane" key={d.id}>
-            <div className="tl-head">
-              <span className="ic">{d.icon}</span>
-              <span className="ln">
-                {d.id} {d.name}
-              </span>
-              <small>{d.short}</small>
-            </div>
-            <div className="tl-track" style={{ '--bx': xp(BREAK) + '%' } as CSSProperties}>
-              {nodesOf(d).map(({ m, yr }) => {
-                const dim = rdFilter && !m.rd.includes(rdFilter)
-                return (
-                  <button
-                    key={m.id}
-                    className={'tl-node ' + confClass(m.confidence) + (dim ? ' dim' : '')}
-                    style={{ left: xp(yr) + '%' }}
-                    title={`${m.title}（${m.confidence}）`}
-                    onClick={() => onPick(m, d)}
-                  >
-                    <span className="mk" />
-                  </button>
-                )
-              })}
-            </div>
-          </div>
-        ))}
-      </div>
+      <figcaption className="figcap">
+        図1 ── 5つの社会的ドライバを連続時間軸の上に置き、技術マイルストーンを発生時期に配置した。
+        実線=〜2035（確度の高い近中期）、点線=2035〜（長期シナリオ）。点にカーソル／タップで詳細。
+      </figcaption>
 
       <div className="legend">
         <span className="lg"><span className="di di-e" />確立</span>
