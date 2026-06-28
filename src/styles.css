@@ -104,7 +104,10 @@ sup { color: var(--accent); }
   position: sticky; left: 0; z-index: 4; display: inline-block;
   padding: 12px 14px 0 0; background: linear-gradient(90deg, var(--paper) 80%, transparent);
 }
-.tl-head .ic { margin-right: 6px; }
+.tl-head .lid {
+  font-family: var(--font-mono); font-weight: 600; font-size: 12px; color: var(--accent);
+  margin-right: 8px; letter-spacing: .02em;
+}
 .tl-head .ln { font-family: var(--font-jp); font-weight: 600; font-size: 14px; }
 .tl-head small { display: block; font-size: 11px; color: var(--dim); margin: 3px 0 0; }
 .tl-track {

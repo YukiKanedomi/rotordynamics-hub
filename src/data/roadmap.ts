@@ -22,7 +22,6 @@ export interface Driver {
   id: string
   name: string
   short: string
-  icon: string
   trends: { text: string; confidence: Confidence; source?: string }[]
   demandShift: string
   milestones: Milestone[]
@@ -62,7 +61,6 @@ export const DRIVERS: Driver[] = [
     id: 'D1',
     name: '電動化・産業脱炭素',
     short: 'EV/e-axle・ヒートポンプ・産業電化',
-    icon: '⚡',
     trends: [
       { text: 'e-axle 入力 14–20k rpm → 2035年 25k、30k rpm 級が試作段階（NEVロードマップ2.0）。DOE 2025 は 50 kW/L 目標', confidence: '確立', source: 'MDPI-EVS-13-4-65' },
       { text: 'ヒートポンプ世界ストック 180M台(2020)→約600M台(2030, IEA-NZE)、暖房需要の20%超', confidence: '確立', source: 'IEA-FutureHeatPumps-2022' },
@@ -83,7 +81,6 @@ export const DRIVERS: Driver[] = [
     id: 'D2',
     name: 'エネルギー転換',
     short: '水素・アンモニア・e-fuel・CCUS',
-    icon: '🟢',
     trends: [
       { text: 'IEA: 2030年までに稼働確度の高い低排出水素 4 Mtpa 超(FID済)、計画電解装置の過半は稼働目標年を超過(slip)', confidence: '確立', source: 'IEA-GHR-2025' },
       { text: '日本のアンモニア燃料: 2030年 300万t → 2050年 3,000万t、電力1%(2030)→10%(2050)。GE×IHI が F級GTで100%専焼を2030年商用化', confidence: '確立', source: 'GEV-IHI-NH3-2025' },
@@ -104,7 +101,6 @@ export const DRIVERS: Driver[] = [
     id: 'D3',
     name: 'データセンター/AI',
     short: '電力・冷却需要の爆発',
-    icon: '🖥️',
     trends: [
       { text: 'DC電力需要 2024年 415 TWh → 2030年 約945 TWh（世界電力の~1.5%→~3%）。AI特化サーバが増分のほぼ半分', confidence: '確立', source: 'IEA-EnergyAI-2025' },
       { text: 'behind-the-meter／オンサイト発電が2025年以降主流化、82 GW規模がannounce。短納期ガスタービン採用拡大', confidence: '確立', source: 'Cleanview-BTM-2025' },
@@ -124,7 +120,6 @@ export const DRIVERS: Driver[] = [
     id: 'D4',
     name: '航空・モビリティ',
     short: 'eVTOL・電動推進・FC・舶用',
-    icon: '✈️',
     trends: [
       { text: 'FC用エアコンプレッサは非接触エアフォイル軸受で最大10万rpm級、先進設計は15万rpm超、オイルフリー9kg以下。IHIが2023年に従来比3.5倍出力の100kW級を発表', confidence: '確立', source: 'IHI-eTurboComp-2023' },
       { text: 'NASA 電動推進モータ最低目標 12 kW/kg（市販約2 kW/kg）、UIUC機で15 kW/kg・効率96%超。GEがMW級ハイブリッド推進を45,000ft模擬試験', confidence: '確立', source: 'NASA-EAP-NTRS' },
@@ -147,7 +142,6 @@ export const DRIVERS: Driver[] = [
     id: 'D5',
     name: 'デジタル化・油フリー化・規格',
     short: '技術側ドライバ（全ドライバ横断）',
-    icon: '🧠',
     trends: [
       { text: 'ロータ系の不確かさ定量化(UQ)が2023年に体系化（PCE/Kriging/Monte Carlo/区間/Bayesian）。危険速度の確率論的評価が実装段階', confidence: '確立', source: 'Fu-MSSP-UQreview-2023' },
       { text: 'デジタルツインの中核はサロゲート＋PINN。ただしロータダイナミクス専用のリアルタイムDTはまだ事例希薄', confidence: '推定', source: 'TGM-AIEng-2026' },

@@ -231,10 +231,8 @@ function TimelineView({
               return (
                 <div className="tl-lane" key={d.id}>
                   <div className="tl-head">
-                    <span className="ic">{d.icon}</span>
-                    <span className="ln">
-                      {d.id} {d.name}
-                    </span>
+                    <span className="lid">{d.id}</span>
+                    <span className="ln">{d.name}</span>
                     <small>{d.short}</small>
                   </div>
                   <div className="tl-track" style={{ '--bx': xp(BREAK) + '%' } as CSSProperties}>
@@ -347,7 +345,7 @@ function TimelineMobile({
                     onClick={() => onPick(m, d)}
                   >
                     <span className="vt-row">
-                      <span className="vt-driver">{d.icon} {d.id} {d.name}</span>
+                      <span className="vt-driver"><b>{d.id}</b> {d.name}</span>
                       <span className={confClass(m.confidence)}>{m.confidence}</span>
                     </span>
                     <span className="vt-title">{m.title}</span>
@@ -377,7 +375,7 @@ function DriversView({ onPick }: { onPick: (m: Milestone, d: Driver) => void }) 
         <section className="card" key={d.id}>
           <h2 className="card-h">
             <span className="lnum">{String(i + 1).padStart(2, '0')}</span>
-            <span className="d-icon">{d.icon}</span> {d.name}
+            {d.name}
             <small>{d.short}</small>
           </h2>
           <h3>社会・産業動向</h3>
@@ -429,7 +427,7 @@ function VectorsView() {
                 const d = DRIVERS.find((x) => x.id === id)!
                 return (
                   <span className="pill" key={id}>
-                    {d.icon} {d.id}
+                    {d.id} {d.name}
                   </span>
                 )
               })}
@@ -524,7 +522,7 @@ function Drawer({ data, onClose }: { data: { m: Milestone; driver: Driver }; onC
         <div className="dr-tags">
           <span className="hz">{horizonLabel}</span>
           <span className={confClass(m.confidence)}>{m.confidence}</span>
-          <span className="pill">{driver.icon} {driver.id} {driver.name}</span>
+          <span className="pill">{driver.id} {driver.name}</span>
         </div>
         <h2 className="dr-h">{m.title}</h2>
         <p className="dr-detail">{m.detail}</p>
