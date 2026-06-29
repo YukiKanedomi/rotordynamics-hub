@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
   ORBIT,
   FORCE_RULES,
@@ -40,6 +40,163 @@ function RefList({ refs }: { refs: Ref[] }) {
         ),
       )}
     </span>
+  )
+}
+
+/* ───────── インタラクティブ：異方性で円→楕円（前進円＋後退円） ───────── */
+type Cx = { re: number; im: number }
+const cAdd = (a: Cx, b: Cx): Cx => ({ re: a.re + b.re, im: a.im + b.im })
+const cSub = (a: Cx, b: Cx): Cx => ({ re: a.re - b.re, im: a.im - b.im })
+const cScale = (a: Cx, s: number): Cx => ({ re: a.re * s, im: a.im * s })
+const cConj = (a: Cx): Cx => ({ re: a.re, im: -a.im })
+const cAbs = (a: Cx): number => Math.hypot(a.re, a.im)
+const cRot = (a: Cx, t: number): Cx => ({
+  re: a.re * Math.cos(t) - a.im * Math.sin(t),
+  im: a.re * Math.sin(t) + a.im * Math.cos(t),
+})
+// 1自由度の伝達関数 H(k)=1/(k−Ω²+icΩ)（m=1, k=ω₀²）
+const Hfun = (k: number, Om: number, c: number): Cx => {
+  const re = k - Om * Om,
+    im = c * Om
+  const d = re * re + im * im || 1e-9
+  return { re: re / d, im: -im / d }
+}
+const ZETA = 0.06 // 減衰比（ω_x 基準, 固定）
+
+function AnisotropyViz() {
+  const [a, setA] = useState(2.2) // 異方性 k_y/k_x
+  const [Om, setOm] = useState(0.6) // 回転数 Ω/ω_x
+  const [play, setPlay] = useState(true)
+  const [psi, setPsi] = useState(0)
+
+  useEffect(() => {
+    if (!play) return
+    let raf = 0
+    let last: number | undefined
+    const loop = (t: number) => {
+      if (last === undefined) last = t
+      const dt = (t - last) / 1000
+      last = t
+      setPsi((p) => (p + dt * 1.1) % (Math.PI * 2))
+      raf = requestAnimationFrame(loop)
+    }
+    raf = requestAnimationFrame(loop)
+    return () => cancelAnimationFrame(raf)
+  }, [play])
+
+  const kx = 1,
+    ky = a,
+    c = 2 * ZETA * Math.sqrt(kx)
+  const Hx = Hfun(kx, Om, c),
+    Hy = Hfun(ky, Om, c)
+  const rf = cScale(cAdd(Hx, Hy), 0.5)
+  const rb = cScale(cSub(cConj(Hx), cConj(Hy)), 0.5)
+  const Rf = cAbs(rf),
+    Rb = cAbs(rb)
+  const semi = Rf + Rb || 1e-9
+  const CX = 180,
+    CY = 150,
+    R = 116
+  const scale = R / semi
+  const map = (z: Cx) => ({ x: CX + z.re * scale, y: CY - z.im * scale })
+  const zAt = (p: number) => cAdd(cRot(rf, p), cRot(rb, -p))
+
+  const NP = 90
+  let path = ''
+  for (let i = 0; i <= NP; i++) {
+    const m = map(zAt((i / NP) * Math.PI * 2))
+    path += (i ? 'L' : 'M') + m.x.toFixed(1) + ',' + m.y.toFixed(1)
+  }
+  path += 'Z'
+  const MS = 24
+  const strobe = Array.from({ length: MS }, (_, i) => map(zAt((i / MS) * Math.PI * 2)))
+
+  const Pf = cRot(rf, psi)
+  const Z = cAdd(Pf, cRot(rb, -psi))
+  const mO = { x: CX, y: CY },
+    mPf = map(Pf),
+    mZ = map(Z)
+  const ratio = Rf > 1e-9 ? Rb / Rf : 0
+  const ellip = (Rf - Rb) / (Rf + Rb || 1e-9) // 短軸/長軸
+  const wy = Math.sqrt(a)
+
+  return (
+    <div className="aviz">
+      <div className="figtag">Interactive — 異方性で円が楕円になる（前進円 ⊕ 後退円）</div>
+      <p className="section-note">
+        不釣合い（前進する力）への定常応答。<b>異方性</b>スライダーで支持剛性の縦横差をつけると、真円が
+        楕円に潰れ、<span className="ob">後退円 r_b</span> が育つ。大きな前進円が小さな後退円を運び、その和が
+        ロータの軌道。等時間ストロボ点の<b>混み具合＝速さ</b>（混む所で減速＝ブレーキ）。
+      </p>
+      <div className="aviz-grid">
+        <figure className="aviz-fig">
+          <svg viewBox="0 0 360 300" className="aviz-svg" role="img" aria-label="異方性による軌道">
+            <line x1={CX} y1={26} x2={CX} y2={274} className="av-axis" />
+            <line x1={54} y1={CY} x2={306} y2={CY} className="av-axis" />
+            <text x={310} y={CY + 4} className="av-lbl dim">k_x（横）</text>
+            <text x={CX + 5} y={22} className="av-lbl dim">k_y（縦・硬い側）</text>
+
+            <path d={path} className="av-orbit" />
+            {strobe.map((m, i) => (
+              <circle key={i} cx={m.x} cy={m.y} r={2.3} className="av-strobe" />
+            ))}
+
+            {/* 前進円（原点中心） */}
+            <circle cx={mO.x} cy={mO.y} r={Rf * scale} className="av-fcirc" />
+            {/* 後退円（前進点を中心に運ばれるエピサイクル） */}
+            <circle cx={mPf.x} cy={mPf.y} r={Rb * scale} className="av-bcirc" />
+            {/* ベクトル: O→前進点→ロータ点 */}
+            <line x1={mO.x} y1={mO.y} x2={mPf.x} y2={mPf.y} className="av-fvec" />
+            <line x1={mPf.x} y1={mPf.y} x2={mZ.x} y2={mZ.y} className="av-bvec" />
+            <circle cx={mPf.x} cy={mPf.y} r={3.4} className="av-fdot" />
+            <circle cx={mZ.x} cy={mZ.y} r={6} className="av-rotor" />
+          </svg>
+          <figcaption>
+            <span className="av-leg"><i className="sw f" />前進円 r_f</span>
+            <span className="av-leg"><i className="sw b" />後退円 r_b</span>
+            <span className="av-leg"><i className="sw r" />ロータ点（軌道）</span>
+            <span className="av-leg"><i className="sw s" />等時間ストロボ</span>
+          </figcaption>
+        </figure>
+
+        <div className="aviz-ctrl">
+          <label className="aviz-row">
+            <span>異方性 k_y/k_x</span>
+            <input type="range" min={1} max={4} step={0.05} value={a} onChange={(e) => setA(+e.target.value)} />
+            <b>{a.toFixed(2)}</b>
+          </label>
+          <label className="aviz-row">
+            <span>回転数 Ω/ω_x</span>
+            <input type="range" min={0.2} max={2.4} step={0.02} value={Om} onChange={(e) => setOm(+e.target.value)} />
+            <b>{Om.toFixed(2)}</b>
+          </label>
+          <div className="aviz-freq">
+            ω_x=1.00 ・ ω_y=√(k_y/k_x)={wy.toFixed(2)} ・ <span className="ob">Ω={Om.toFixed(2)}</span>
+          </div>
+          <button className="aviz-btn" onClick={() => setPlay((p) => !p)}>
+            {play ? '⏸ 一時停止' : '▶ 再生'}
+          </button>
+
+          <div className="aviz-ratio">
+            <span className="aviz-ratio-k">後退/前進比 r_b / r_f</span>
+            <strong>{ratio.toFixed(2)}</strong>
+            <small>楕円のつぶれ具合。異方性と回転数で決まり、不釣合いの大小には依らない。</small>
+          </div>
+          <div className="aviz-bars">
+            <div className="aviz-bar">
+              <span>r_f</span><i className="bf" style={{ width: '100%' }} />
+            </div>
+            <div className="aviz-bar">
+              <span>r_b</span><i className="bb" style={{ width: Math.min(100, ratio * 100) + '%' }} />
+            </div>
+          </div>
+          <div className="aviz-note">
+            楕円率 短軸/長軸 = <b>{ellip.toFixed(2)}</b>（1=真円・0=直線）。Ω を ω_x や ω_y に近づけると
+            その向きだけ共振し、軌道はほぼ直線（r_b≈r_f）に。
+          </div>
+        </div>
+      </div>
+    </div>
   )
 }
 
@@ -168,6 +325,8 @@ function OverviewView() {
           ))}
         </div>
       </div>
+
+      <AnisotropyViz />
 
       <h2 className="sec-h">励振力の向きによる分類<small>（BW励起の判定基準・3則）</small></h2>
       <p className="section-note">

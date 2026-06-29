@@ -506,6 +506,52 @@ sup { color: var(--accent); }
   background: var(--paper-raise); border: 1px solid var(--rule); border-radius: 6px; padding: 3px 9px;
 }
 
+/* interactive anisotropy viz */
+.aviz { margin: 22px 0 26px; padding: 16px 18px; border: 1px solid var(--rule); border-radius: var(--radius-lg); background: var(--paper-raise); }
+.aviz .section-note b { color: var(--ink); font-weight: 600; }
+.aviz-grid { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr); gap: 18px; align-items: start; }
+.aviz-fig { margin: 0; }
+.aviz-svg { width: 100%; height: auto; display: block; background: var(--paper); border: 1px solid var(--rule); border-radius: var(--radius); }
+.av-axis { stroke: var(--rule); stroke-width: 1; }
+.av-orbit { fill: none; stroke: var(--ink); stroke-width: 1.5; opacity: .45; }
+.av-strobe { fill: var(--ink); opacity: .5; }
+.av-fcirc { fill: none; stroke: var(--accent); stroke-width: 1.2; stroke-dasharray: 3 3; opacity: .65; }
+.av-bcirc { fill: none; stroke: var(--accent-2); stroke-width: 1.2; stroke-dasharray: 3 3; opacity: .8; }
+.av-fvec { stroke: var(--accent); stroke-width: 1.8; }
+.av-bvec { stroke: var(--accent-2); stroke-width: 1.8; }
+.av-fdot { fill: var(--accent); }
+.av-rotor { fill: var(--ink); stroke: var(--paper); stroke-width: 1.5; }
+.av-lbl { font-family: var(--font-mono); font-size: 9.5px; }
+.av-lbl.dim { fill: var(--dim); }
+.aviz-fig figcaption { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: 8px; }
+.av-leg { display: inline-flex; align-items: center; gap: 5px; font-family: var(--font-mono); font-size: 10.5px; color: var(--ink-soft); }
+.av-leg .sw { width: 11px; height: 11px; border-radius: 50%; display: inline-block; }
+.av-leg .sw.f { background: var(--accent); }
+.av-leg .sw.b { background: var(--accent-2); }
+.av-leg .sw.r { background: var(--ink); }
+.av-leg .sw.s { background: var(--dim); width: 7px; height: 7px; }
+
+.aviz-ctrl { display: flex; flex-direction: column; gap: 11px; }
+.aviz-row { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 9px; font-family: var(--font-mono); font-size: 11.5px; color: var(--ink-soft); }
+.aviz-row span { white-space: nowrap; }
+.aviz-row b { font-family: var(--font-display); font-size: 14px; color: var(--accent); min-width: 38px; text-align: right; }
+.aviz-row input[type=range] { width: 100%; accent-color: var(--accent); }
+.aviz-freq { font-family: var(--font-mono); font-size: 11px; color: var(--dim); }
+.aviz-freq .ob { color: var(--accent); }
+.aviz-btn { align-self: flex-start; font-family: var(--font-jp); font-size: 13px; color: var(--ink); background: var(--paper-sink); border: 1px solid var(--rule); border-radius: 999px; padding: 6px 16px; cursor: pointer; }
+.aviz-btn:hover { border-color: var(--accent); color: var(--accent); }
+.aviz-ratio { background: var(--paper-sink); border-left: 3px solid var(--accent); border-radius: 0 10px 10px 0; padding: 10px 14px; }
+.aviz-ratio-k { display: block; font-family: var(--font-mono); font-size: 10px; letter-spacing: .04em; text-transform: uppercase; color: var(--accent); }
+.aviz-ratio strong { font-family: var(--font-display); font-size: 28px; line-height: 1.1; color: var(--ink); }
+.aviz-ratio small { display: block; font-size: 11px; color: var(--dim); line-height: 1.55; margin-top: 2px; }
+.aviz-bars { display: flex; flex-direction: column; gap: 6px; }
+.aviz-bar { display: grid; grid-template-columns: 28px 1fr; align-items: center; gap: 8px; font-family: var(--font-mono); font-size: 11px; color: var(--ink-soft); }
+.aviz-bar i { height: 12px; border-radius: 3px; display: block; }
+.aviz-bar .bf { background: var(--accent); }
+.aviz-bar .bb { background: var(--accent-2); min-width: 2px; }
+.aviz-note { font-size: 11.5px; line-height: 1.6; color: var(--ink-soft); }
+.aviz-note b { color: var(--accent); }
+
 .bw-rules { display: flex; flex-direction: column; gap: 12px; margin-top: 8px; }
 .bw-rule {
   display: flex; gap: 16px; background: var(--paper-raise); border: 1px solid var(--rule);
@@ -642,6 +688,7 @@ sup { color: var(--accent); }
 /* ───── responsive ───── */
 @media (max-width: 760px) {
   .bw-figgrid { grid-template-columns: 1fr; }
+  .aviz-grid { grid-template-columns: 1fr; }
   .bw-card-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .bw-tree-branches { grid-template-columns: 1fr; }
   .hub-nav { margin-left: 0; width: 100%; }
