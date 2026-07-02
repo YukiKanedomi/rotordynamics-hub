@@ -162,7 +162,7 @@ function RoadmapSection() {
           ['story', 'ストーリー'],
           ['linkage', 'つながり図'],
           ['timeline', 'ロードマップ'],
-          ['drivers', '5ドライバ'],
+          ['drivers', '6ドライバ'],
           ['vectors', '共通ベクトル'],
           ['rdmap', 'RD課題マップ'],
           ['sources', '出典'],
@@ -222,7 +222,7 @@ function TimelineView({
     <div className="tl">
       <div className="tl-masth">
         <div>
-          <div className="figtag">Fig. 1 — 5 Drivers × Continuous Timeline</div>
+          <div className="figtag">Fig. 1 — 6 Drivers × Continuous Timeline</div>
           <p className="section-note">
             横軸は実時間。各ドライバの帯に並ぶ点が技術マイルストーン。点をたどると「いつ・何を」確立
             すべきかが分かる。<span className="ob">塗り＝確立</span>、白抜き＝推定、破線＝仮説。
@@ -619,7 +619,7 @@ function TimelineMobile({
 }) {
   return (
     <div className="tl">
-      <div className="figtag">Fig. 1 — 5 Drivers × Timeline</div>
+      <div className="figtag">Fig. 1 — 6 Drivers × Timeline</div>
       <p className="section-note">
         時間に沿って技術マイルストーンを縦に配置。各カードは担当ドライバ（色・記号）で色分け。
         <span className="ob">塗り＝確立</span>、白抜き＝推定、破線＝仮説。下のタグで絞り込み、カードのタップで詳細。
